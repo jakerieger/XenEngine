@@ -1,0 +1,6 @@
+.idea/
+.cache/
+build/
+**/bin/
+**/obj/
+**/.vs/
