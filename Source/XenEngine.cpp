@@ -3,6 +3,8 @@
 //
 
 #include "XenEngine.h"
+#include "Platform.h"
+
 #include <iostream>
 
 namespace Xen {

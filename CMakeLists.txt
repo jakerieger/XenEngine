@@ -23,5 +23,12 @@ add_library(XenEngine STATIC
         ${SRC}/XenEngine.cpp
 )
 
+target_link_libraries(XenEngine PRIVATE
+        dxgi.lib
+        d2d1.lib
+        d3d11.lib
+        winmm.lib
+)
+
 add_executable(XnSimpleGame Examples/SimpleGame.cpp)
 target_link_libraries(XnSimpleGame PRIVATE XenEngine)
