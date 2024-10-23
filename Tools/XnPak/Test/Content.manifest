@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<XnPakManifest>
+    <OutputDir>Content</OutputDir>
+    <Compress>false</Compress>
+    <Content>
+        <Asset name="idle">
+            <Type>Texture</Type>
+            <Build>sprites/idle.png</Build>
+        </Asset>
+        <Asset name="blink">
+            <Type>Texture</Type>
+            <Build>sprites/blink.png</Build>
+        </Asset>
+        <Asset name="punched">
+            <Type>Texture</Type>
+            <Build>sprites/punched.png</Build>
+        </Asset>
+    </Content>
+</XnPakManifest>

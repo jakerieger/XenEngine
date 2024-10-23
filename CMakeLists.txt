@@ -11,10 +11,13 @@ set(INC ${CMAKE_CURRENT_SOURCE_DIR}/Include/XenEngine)
 set(VEND ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 set(TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/Tools)
 
+#add_subdirectory(${VEND}/yaml-cpp)
+
 include_directories(
         ${SRC}
         ${INC}
         ${VEND}
+        ${VEND}/yaml-cpp/include
 )
 
 add_library(XenEngine STATIC
@@ -28,6 +31,7 @@ target_link_libraries(XenEngine PRIVATE
         d2d1.lib
         d3d11.lib
         winmm.lib
+#        yaml-cpp::yaml-cpp
 )
 
 add_executable(XnSimpleGame Examples/SimpleGame.cpp)
