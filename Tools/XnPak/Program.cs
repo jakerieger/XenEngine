@@ -45,10 +45,15 @@ internal abstract class Program {
                         TextureImporter.Import(originalPath));
                     break;
                 case AssetType.Audio:
+                    bytes.AddRange(
+                        AudioImporter.Import(originalPath));
                     break;
                 case AssetType.Font:
+                    bytes.AddRange(
+                        FontImporter.Import(originalPath));
                     break;
                 case AssetType.PlainText:
+                    bytes.AddRange(File.ReadAllBytes(originalPath));
                     break;
             }
 
