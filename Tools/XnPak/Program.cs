@@ -14,8 +14,11 @@ internal abstract class Program {
         Console.WriteLine("  | Created output directory: {0}", contentDir);
         Console.WriteLine("  | Found {0} assets.", manifest.Assets.Length);
 
+        var assetCount = manifest.Assets.Length;
+        var assetId = 1;
         foreach (var asset in manifest.Assets) {
-            Console.WriteLine("  | Building asset: {0}", asset.Build);
+            Console.WriteLine("  | [{0}/{1}] Building asset: {2}", assetId, assetCount,
+                asset.Build);
 
             string outputPath;
             var fileName = asset.Name;
@@ -50,11 +53,10 @@ internal abstract class Program {
             }
 
             File.WriteAllBytes(pakFile, bytes.ToArray());
-
-            Console.WriteLine("  | Created asset: {0}", asset.Name);
+            assetId++;
         }
 
-        Console.WriteLine("- Successfully built manifest.");
+        Console.WriteLine("- Build successful.");
     }
 
     public static void RebuildManifest(ref Manifest manifest) { }
