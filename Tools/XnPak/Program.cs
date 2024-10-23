@@ -34,7 +34,7 @@ internal abstract class Program {
             else
                 outputPath = Path.Combine(contentDir, asset.Name);
 
-            var pakFile = Path.Combine(outputPath, string.Format("{0}.pak", fileName));
+            var pakFile = Path.Combine(outputPath, string.Format("{0}.xpak", fileName));
 
             // This is the point where the different importer classes will come in handy.
             var bytes = new List<byte>();
@@ -64,9 +64,13 @@ internal abstract class Program {
         Console.WriteLine("- Build successful.");
     }
 
-    public static void RebuildManifest(ref Manifest manifest) { }
+    public static void CleanManifest(ref Manifest manifest) {
+        Console.WriteLine("- Cleaning manifest.");
 
-    public static void CleanManifest(ref Manifest manifest) { }
+        var contentDir = Path.Combine(manifest.RootDirectory, manifest.OutputDirectory);
+        if (Directory.Exists(contentDir)) Directory.Delete(contentDir, true);
+        Directory.CreateDirectory(contentDir);
+    }
 
     public static void Main(string[] args) {
         Parser.Default.ParseArguments<Options>(args)
@@ -89,8 +93,6 @@ internal abstract class Program {
 
         if (opts.Build)
             BuildManifest(ref manifest);
-        else if (opts.Rebuild)
-            RebuildManifest(ref manifest);
         else if (opts.Clean) CleanManifest(ref manifest);
     }
 
@@ -105,10 +107,6 @@ internal abstract class Program {
         [Option('b', "build", Required = false, HelpText = "Build the manifest.",
             Group = "BuildAction")]
         public bool Build { get; set; }
-
-        [Option('r', "rebuild", Required = false, HelpText = "Rebuild the manifest.",
-            Group = "BuildAction")]
-        public bool Rebuild { get; set; }
 
         [Option('c', "clean", Required = false, HelpText = "Clean the manifest.",
             Group = "BuildAction")]

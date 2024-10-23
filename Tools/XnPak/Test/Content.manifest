@@ -15,5 +15,9 @@
             <Type>Texture</Type>
             <Build>sprites/punched.png</Build>
         </Asset>
+        <Asset name="audio/piano">
+            <Type>Audio</Type>
+            <Build>audio/piano.wav</Build>
+        </Asset>
     </Content>
 </PakManifest>
