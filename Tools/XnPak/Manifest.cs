@@ -5,19 +5,41 @@ using System.Xml.Linq;
 
 namespace XnPak;
 
+public enum AssetType {
+    Texture,
+    Audio,
+    Font,
+    PlainText
+}
+
 public struct Asset {
     public string Name { get; set; }
-    public string Type { get; set; }
+    public AssetType Type { get; set; }
     public string Build { get; set; }
 
     public Asset(string name, string type, string build) {
         Name = name;
-        Type = type;
+        Type = getType(type);
         Build = build;
     }
 
     public override string ToString() {
         return $"Name: {Name}, Type: {Type}, Build: {Build}";
+    }
+
+    private static AssetType getType(string type) {
+        switch (type) {
+            case "Texture":
+                return AssetType.Texture;
+            case "Audio":
+                return AssetType.Audio;
+            case "Font":
+                return AssetType.Font;
+            case "PlainText":
+                return AssetType.PlainText;
+        }
+
+        return AssetType.PlainText;
     }
 }
 
@@ -44,9 +66,10 @@ public struct Manifest {
         if (manifest.Root.Element("Content") is null) return false;
         if (manifest.Root.Element("Content")!.Elements("Asset").Count() is 0) return false;
 
-        foreach (var el in manifest.Root.Element("Content")!.Elements("Asset"))
+        foreach (var el in manifest.Root.Element("Content")!.Elements("Asset")) {
             if (!validateAsset(el))
                 return false;
+        }
 
         return true;
     }
@@ -58,7 +81,8 @@ public struct Manifest {
         if (!validateManifest(ref doc)) throw new FormatException("Invalid manifest file");
 
         OutputDirectory = doc.Root!.Element("OutputDir")!.Value;
-        Compress = doc.Root.Element("Compress")!.Value.Equals("true", StringComparison.OrdinalIgnoreCase);
+        Compress = doc.Root.Element("Compress")!.Value.Equals("true",
+            StringComparison.OrdinalIgnoreCase);
         Assets = doc.Root.Element("Content")!.Elements("Asset")
             .Select(asset => new Asset(
                 asset.Attribute("name")!.Value,
