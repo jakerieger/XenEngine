@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 namespace XnPak;
 
@@ -12,34 +9,23 @@ public enum AssetType {
     PlainText
 }
 
-public struct Asset {
-    public string Name { get; set; }
-    public AssetType Type { get; set; }
-    public string Build { get; set; }
-
-    public Asset(string name, string type, string build) {
-        Name = name;
-        Type = getType(type);
-        Build = build;
-    }
+public struct Asset(string name, string type, string build) {
+    public string Name { get; set; } = name;
+    public AssetType Type { get; set; } = GetType(type);
+    public string Build { get; set; } = build;
 
     public override string ToString() {
         return $"Name: {Name}, Type: {Type}, Build: {Build}";
     }
 
-    private static AssetType getType(string type) {
-        switch (type) {
-            case "Texture":
-                return AssetType.Texture;
-            case "Audio":
-                return AssetType.Audio;
-            case "Font":
-                return AssetType.Font;
-            case "PlainText":
-                return AssetType.PlainText;
-        }
-
-        return AssetType.PlainText;
+    private static AssetType GetType(string type) {
+        return type switch {
+            "Texture" => AssetType.Texture,
+            "Audio" => AssetType.Audio,
+            "Font" => AssetType.Font,
+            "PlainText" => AssetType.PlainText,
+            _ => AssetType.PlainText
+        };
     }
 }
 
@@ -49,7 +35,7 @@ public struct Manifest {
     public Asset[] Assets { get; set; }
     public string RootDirectory { get; set; }
 
-    private bool validateAsset(XElement element) {
+    private static bool ValidateAsset(XElement element) {
         if (element.Name != "Asset") return false;
         if (element.Attribute("name") is null) return false;
         if (element.Element("Type") is null) return false;
@@ -58,7 +44,7 @@ public struct Manifest {
         return true;
     }
 
-    private bool validateManifest(ref XDocument manifest) {
+    private static bool ValidateManifest(ref XDocument manifest) {
         if (manifest.Root is null) return false;
         if (manifest.Root.Name != "PakManifest") return false;
         if (manifest.Root.Element("OutputDir") is null) return false;
@@ -66,19 +52,14 @@ public struct Manifest {
         if (manifest.Root.Element("Content") is null) return false;
         if (manifest.Root.Element("Content")!.Elements("Asset").Count() is 0) return false;
 
-        foreach (var el in manifest.Root.Element("Content")!.Elements("Asset")) {
-            if (!validateAsset(el))
-                return false;
-        }
-
-        return true;
+        return manifest.Root.Element("Content")!.Elements("Asset").All(ValidateAsset);
     }
 
     public Manifest(string filename) {
         RootDirectory = Path.GetDirectoryName(filename)!;
 
         var doc = XDocument.Load(filename);
-        if (!validateManifest(ref doc)) throw new FormatException("Invalid manifest file");
+        if (!ValidateManifest(ref doc)) throw new FormatException("Invalid manifest file");
 
         OutputDirectory = doc.Root!.Element("OutputDir")!.Value;
         Compress = doc.Root.Element("Compress")!.Value.Equals("true",

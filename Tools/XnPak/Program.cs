@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using CommandLine;
+﻿using CommandLine;
+using XnPak.Importers;
 
 namespace XnPak;
 
 internal abstract class Program {
-    public static void buildManifest(ref Manifest manifest) {
+    public static void BuildManifest(ref Manifest manifest) {
         Console.WriteLine("- Building manifest.");
 
         var contentDir = Path.Combine(manifest.RootDirectory, manifest.OutputDirectory);
@@ -36,8 +34,12 @@ internal abstract class Program {
             var pakFile = Path.Combine(outputPath, string.Format("{0}.pak", fileName));
 
             // This is the point where the different importer classes will come in handy.
+            var bytes = new List<byte>();
+            var originalPath = Path.Combine(manifest.RootDirectory, asset.Build);
             switch (asset.Type) {
                 case AssetType.Texture:
+                    bytes.AddRange(
+                        TextureImporter.Import(originalPath));
                     break;
                 case AssetType.Audio:
                     break;
@@ -47,10 +49,7 @@ internal abstract class Program {
                     break;
             }
 
-            var assetBytes
-                = File.ReadAllBytes(Path.Combine(manifest.RootDirectory, asset.Build));
-
-            File.WriteAllBytes(pakFile, assetBytes);
+            File.WriteAllBytes(pakFile, bytes.ToArray());
 
             Console.WriteLine("  | Created asset: {0}", asset.Name);
         }
@@ -58,9 +57,9 @@ internal abstract class Program {
         Console.WriteLine("- Successfully built manifest.");
     }
 
-    public static void rebuildManifest(ref Manifest manifest) { }
+    public static void RebuildManifest(ref Manifest manifest) { }
 
-    public static void cleanManifest(ref Manifest manifest) { }
+    public static void CleanManifest(ref Manifest manifest) { }
 
     public static void Main(string[] args) {
         Parser.Default.ParseArguments<Options>(args)
@@ -82,10 +81,10 @@ internal abstract class Program {
         Console.WriteLine("- Reading manifest from: {0}", manifestPath);
 
         if (opts.Build)
-            buildManifest(ref manifest);
+            BuildManifest(ref manifest);
         else if (opts.Rebuild)
-            rebuildManifest(ref manifest);
-        else if (opts.Clean) cleanManifest(ref manifest);
+            RebuildManifest(ref manifest);
+        else if (opts.Clean) CleanManifest(ref manifest);
     }
 
     private static void HandleParseError(IEnumerable<Error> errs) {
