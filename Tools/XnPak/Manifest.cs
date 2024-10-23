@@ -1,42 +1,49 @@
-﻿using System.Xml.Linq;
-using System;
+﻿using System;
 using System.Linq;
+using System.Xml.Linq;
 
-namespace XnPak {
-    public struct Asset {
-        public string Name { get; set; }
-        public string Type { get; set; }
-        public string Build { get; set; }
+namespace XnPak;
 
-        public Asset(string name, string type, string build) {
-            this.Name = name;
-            this.Type = type;
-            this.Build = build;
-        }
+public struct Asset {
+    public string Name { get; set; }
+    public string Type { get; set; }
+    public string Build { get; set; }
 
-        public override string ToString() {
-            return $"Name: {Name}, Type: {Type}, Build: {Build}";
-        }
+    public Asset(string name, string type, string build) {
+        Name = name;
+        Type = type;
+        Build = build;
     }
 
-    public struct Manifest {
-        public string OutputDirectory { get; set; }
-        public bool Compress { get; set; }
-        public Asset[] Assets { get; set; }
+    public override string ToString() {
+        return $"Name: {Name}, Type: {Type}, Build: {Build}";
+    }
+}
 
-        private XDocument _doc;
+public struct Manifest {
+    public string OutputDirectory { get; set; }
+    public bool Compress { get; set; }
+    public Asset[] Assets { get; set; }
 
-        public Manifest(string filename) {
-            _doc = XDocument.Load(filename);
+    private bool validateAsset(ref XElement element) {
+        return true;
+    }
 
-            OutputDirectory = _doc.Root.Element("OutputDir").Value;
-            Compress = _doc.Root.Element("Compress").Value.Equals("true", StringComparison.OrdinalIgnoreCase);
-            Assets = _doc.Root.Element("Content").Elements("Asset")
-                .Select(asset => new Asset(
-                    name: asset.Attribute("name").Value,
-                    type: asset.Element("Type").Value,
-                    build: asset.Element("Build").Value))
-                .ToArray();
-        }
+    private bool validateManifest(ref XDocument manifest) {
+        return true;
+    }
+
+    public Manifest(string filename) {
+        var doc = XDocument.Load(filename);
+        if (!validateManifest(ref doc)) Utilities.Panic("Invalid manifest");
+
+        OutputDirectory = doc.Root.Element("OutputDir").Value;
+        Compress = doc.Root.Element("Compress").Value.Equals("true", StringComparison.OrdinalIgnoreCase);
+        Assets = doc.Root.Element("Content").Elements("Asset")
+            .Select(asset => new Asset(
+                asset.Attribute("name").Value,
+                asset.Element("Type").Value,
+                asset.Element("Build").Value))
+            .ToArray();
     }
 }
