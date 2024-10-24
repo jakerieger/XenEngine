@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.14)
 project(XenEngine)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -11,13 +11,15 @@ set(INC ${CMAKE_CURRENT_SOURCE_DIR}/Include/XenEngine)
 set(VEND ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 set(TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/Tools)
 
-#add_subdirectory(${VEND}/yaml-cpp)
+add_subdirectory(${VEND}/pugixml)
+add_subdirectory(${VEND}/CLI11)
 
 include_directories(
         ${SRC}
         ${INC}
         ${VEND}
-        ${VEND}/yaml-cpp/include
+        ${VEND}/pugixml/src
+        ${VEND}/CLI11/include
 )
 
 add_library(XenEngine STATIC
@@ -31,8 +33,10 @@ target_link_libraries(XenEngine PRIVATE
         d2d1.lib
         d3d11.lib
         winmm.lib
-#        yaml-cpp::yaml-cpp
+        #        yaml-cpp::yaml-cpp
 )
 
 add_executable(XnSimpleGame Examples/SimpleGame.cpp)
 target_link_libraries(XnSimpleGame PRIVATE XenEngine)
+
+add_subdirectory(${TOOLS}/XnPak)
