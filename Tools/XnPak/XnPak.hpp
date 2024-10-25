@@ -246,7 +246,7 @@ namespace Xen {
                     case AssetType::Texture:
                         // Process texture
                         {
-                            auto bytes = Processors::processTexture(srcPath, true);
+                            auto bytes = Processors::processTexture(srcPath.string(), true);
                             data.resize(bytes.size());
                             std::memcpy(data.data(), bytes.data(), bytes.size());
                         }
@@ -254,7 +254,7 @@ namespace Xen {
                     case AssetType::Audio:
                         // Process audio
                         {
-                            auto bytes = Processors::processAudio(srcPath, true);
+                            auto bytes = Processors::processAudio(srcPath.string(), true);
                             data.resize(bytes.size());
                             std::memcpy(data.data(), bytes.data(), bytes.size());
                         }
@@ -262,7 +262,7 @@ namespace Xen {
                     case AssetType::Font:
                         // Process font
                         {
-                            auto bytes = Processors::processFont(srcPath);
+                            auto bytes = Processors::processFont(srcPath.string());
                             data.resize(bytes.size());
                             std::memcpy(data.data(), bytes.data(), bytes.size());
                         }
@@ -270,7 +270,7 @@ namespace Xen {
                     case AssetType::PlainText:
                         // Process plain text (which is just read straight from file)
                         {
-                            auto bytes = Processors::processPlainText(srcPath);
+                            auto bytes = Processors::processPlainText(srcPath.string());
                             data.resize(bytes.size());
                             std::memcpy(data.data(), bytes.data(), bytes.size());
                         }
