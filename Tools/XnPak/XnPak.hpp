@@ -40,8 +40,52 @@ namespace Xen {
             return result;
         }
 
-        static Vector<u8> processAudio(const str& filename) {
-            return {0, 0, 0, 1, 0, 0, 1, 1};
+        static Vector<u8> processAudio(const str& filename, bool normalize = false) {
+            AudioFile<f32> audioFile;
+            if (!audioFile.load(filename)) {
+                Panic("Failed to load audio file: %s", filename.c_str());
+            }
+
+            if (audioFile.getNumChannels() != 2) {
+                Panic("XnPak only supports stereo audio sources.");
+            }
+
+            // Interleave audio samples into one vector
+            const auto left  = audioFile.samples[0];
+            const auto right = audioFile.samples[1];
+            std::vector<f32> samples;
+            const size_t size = std::min(left.size(), right.size());
+
+            for (size_t i = 0; i < size; ++i) {
+                samples.push_back(left[i]);
+                samples.push_back(right[i]);
+            }
+
+            for (size_t i = size; i < left.size(); ++i) {
+                samples.push_back(left[i]);
+            }
+            for (size_t i = size; i < right.size(); ++i) {
+                samples.push_back(right[i]);
+            }
+
+            // Normalize samples here to save a step during playback
+            if (normalize) {
+                const auto maxAbs = std::abs(*std::ranges::max_element(samples, [](f32 a, f32 b) {
+                    return std::abs(a) < std::abs(b);
+                }));  // Get the highest absolute sample value within our samples array
+                if (maxAbs > 0.0f) {
+                    f32 scaleFactor = 1.f / maxAbs;
+                    for (auto& sample : samples) {
+                        sample *= scaleFactor;
+                    }
+                }
+            }
+
+            // Convert sample data to byte array
+            Vector<u8> result(samples.size() * sizeof(f32));
+            std::memcpy(result.data(), samples.data(), samples.size() * sizeof(f32));
+
+            return result;
         }
 
         static Vector<u8> processFont(const str& filename) {
@@ -195,7 +239,7 @@ namespace Xen {
                     case AssetType::Audio:
                         // Process audio
                         {
-                            auto bytes = Processors::processAudio(srcPath);
+                            auto bytes = Processors::processAudio(srcPath, true);
                             data.resize(bytes.size());
                             std::memcpy(data.data(), bytes.data(), bytes.size());
                         }
