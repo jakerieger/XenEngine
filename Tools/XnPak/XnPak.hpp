@@ -10,13 +10,49 @@
 #include <Types/IO.h>
 #include <Panic.hpp>
 #include <cstring>
-
 #include <pugixml.hpp>
 #include <ranges>
 #include <sstream>
 #include <algorithm>
+#include <fstream>
+#include <stb_image.h>
+#include <AudioFile.h>
 
 namespace Xen {
+    namespace Processors {
+        static Vector<u8> processTexture(const str& filename, bool flip = false) {
+            i32 width, height, channels;
+            stbi_set_flip_vertically_on_load(flip);
+            u8* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+            if (!data) {
+                stbi_image_free(data);
+                Panic("Failed to load image data from file: %s", filename.c_str());
+            }
+
+            if (channels != 4) {
+                stbi_image_free(data);
+                Panic("XnPak only supports 4 channel image formats such as RGBA.");
+            }
+
+            Vector<u8> result(width * height * 4);
+            memcpy(result.data(), data, width * height * 4);
+            stbi_image_free(data);
+            return result;
+        }
+
+        static Vector<u8> processAudio(const str& filename) {
+            return {0, 0, 0, 1, 0, 0, 1, 1};
+        }
+
+        static Vector<u8> processFont(const str& filename) {
+            return {0, 0, 0, 1, 0, 0, 1, 1};
+        }
+
+        static Vector<u8> processPlainText(const str& filename) {
+            return {0, 0, 0, 1, 0, 0, 1, 1};
+        }
+    }  // namespace Processors
+
     static void logStatus(const str& msg) {
         std::cout << msg << '\n';
     }
@@ -91,44 +127,20 @@ namespace Xen {
             }
         }
 
-        void build() {
+        void build() const {
             logStatus("- Building manifest.");
-
-            // Get content output directory and create it.
-            // Relative paths are relative to the location of the manifest file.
-            const auto contentDir = Path(rootDir) / outputDir;
-            if (FileSystem::exists(contentDir)) { FileSystem::remove_all(contentDir); }
-            FileSystem::create_directory(contentDir);
+            const auto contentDir = createContentDir();
 
             std::cout << "  | Created output directory: " << contentDir << '\n';
-            std::cout << "  | Found " << assets.size() << " assets.\n";
-
-            auto assetCount = assets.size();
-            auto assetId    = 1;
-            for (auto& asset : assets) {
-                std::cout << "  | [" << assetId << "/" << assetCount
-                          << "] Building asset: " << asset.name << '\n';
-
-                str outputPath;
-                auto filename = asset.name;
-                auto split    = splitPath(filename);
-                // Name contains subdirectories, create them
-                if (split.size() > 1) {
-                    filename         = split.back();
-                    auto currentPath = Path(contentDir);
-                    for (int i = 0; i < split.size() - 1; i++) {
-                        currentPath /= split[i];
-                        if (!FileSystem::exists(currentPath)) {
-                            FileSystem::create_directory(currentPath);
-                        }
-                    }
-                }
-
-                assetId++;
-            }
+            std::cout << "  | Building " << assets.size() << " assets.\n";
+            buildAssets(contentDir);
         }
 
-        void clean() {}
+        void clean() const {
+            logStatus("- Cleaning build directory.");
+            const auto contentDir = createContentDir();
+            logStatus("- Cleaned build directory.");
+        }
 
         [[nodiscard]] str toString() const {
             std::stringstream ss;
@@ -139,6 +151,83 @@ namespace Xen {
         }
 
     private:
+        [[nodiscard]] Path createContentDir() const {
+            // Get content output directory and create it.
+            // Relative paths are relative to the location of the manifest file.
+            const auto contentDir = Path(rootDir) / outputDir;
+            if (FileSystem::exists(contentDir)) { FileSystem::remove_all(contentDir); }
+            FileSystem::create_directory(contentDir);
+            return contentDir;
+        }
+
+        void buildAssets(const Path& contentDir) const {
+            const auto assetCount = assets.size();
+            auto assetId          = 1;
+            for (auto& asset : assets) {
+                std::cout << "  | [" << assetId << "/" << assetCount
+                          << "] Building asset: " << asset.name << '\n';
+
+                auto split = splitPath(asset.name);
+                // Name contains subdirectories, create them
+                if (split.size() > 1) {
+                    auto currentPath = contentDir;
+                    for (int i = 0; i < split.size() - 1; i++) {
+                        currentPath /= split[i];
+                        if (!FileSystem::exists(currentPath)) {
+                            FileSystem::create_directory(currentPath);
+                        }
+                    }
+                }
+                Path outputPath = contentDir / asset.name;
+                outputPath += ".xpak";
+
+                Vector<u8> data;
+                auto srcPath = Path(rootDir) / asset.build;
+                switch (asset.type) {
+                    case AssetType::Texture:
+                        // Process texture
+                        {
+                            auto bytes = Processors::processTexture(srcPath, true);
+                            data.resize(bytes.size());
+                            std::memcpy(data.data(), bytes.data(), bytes.size());
+                        }
+                        break;
+                    case AssetType::Audio:
+                        // Process audio
+                        {
+                            auto bytes = Processors::processAudio(srcPath);
+                            data.resize(bytes.size());
+                            std::memcpy(data.data(), bytes.data(), bytes.size());
+                        }
+                        break;
+                    case AssetType::Font:
+                        // Process font
+                        {
+                            auto bytes = Processors::processFont(srcPath);
+                            data.resize(bytes.size());
+                            std::memcpy(data.data(), bytes.data(), bytes.size());
+                        }
+                        break;
+                    case AssetType::PlainText:
+                        // Process plain text (which is just read straight from file)
+                        {
+                            auto bytes = Processors::processPlainText(srcPath);
+                            data.resize(bytes.size());
+                            std::memcpy(data.data(), bytes.data(), bytes.size());
+                        }
+                        break;
+                }
+
+                // Write bytes to file
+                std::ofstream file(outputPath, std::ios::binary);
+                if (!file.is_open()) { Panic("Failed to open output file."); }
+                file.write(reinterpret_cast<char*>(data.data()), (std::streamsize)data.size());
+                file.close();
+
+                assetId++;
+            }
+        }
+
         static Vector<str> splitPath(const str& path) {
             Vector<str> result;
             str current;

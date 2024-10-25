@@ -26,9 +26,9 @@ include_directories(
 )
 
 add_library(XenEngine STATIC
-        ${SHARED}/Panic.h
-        ${INC}/Platform.h
-        ${INC}/XenEngine.h
+        ${SHARED}/Panic.hpp
+        ${INC}/Platform.hpp
+        ${INC}/XenEngine.hpp
         ${SRC}/XenEngine.cpp
 )
 

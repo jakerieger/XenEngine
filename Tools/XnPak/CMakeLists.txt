@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Tools)
 
 add_executable(XnPak
-        ${SHARED}/Panic.h
+        ${VEND}/AudioFile.h
+        ${VEND}/stb_image.h
+        ${VEND}/stb_image.cpp
+        ${SHARED}/Panic.hpp
         XnPak.hpp
         XnPak.cpp
         main.cpp
