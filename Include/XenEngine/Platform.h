@@ -38,20 +38,3 @@
 #endif
 
 using Microsoft::WRL::ComPtr;
-
-#include <iostream>
-#include <cstdarg>
-
-[[noreturn]] static void panic_impl(const char* file, int line, const char* func, const char* fmt, ...) noexcept {
-    va_list args;
-    va_start(args, fmt);
-    char message[1024];
-    vsnprintf(message, sizeof(message), fmt, args);
-    va_end(args);
-    std::cerr << file << "(" << line << ") :: PANIC\n"
-              << "  In: " << func << "\n"
-              << "  Message: " << message << std::endl;
-    std::abort();
-}
-
-#define Panic(fmt, ...) panic_impl(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__)

@@ -8,6 +8,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 set(SRC ${CMAKE_CURRENT_SOURCE_DIR}/Source)
 set(INC ${CMAKE_CURRENT_SOURCE_DIR}/Include/XenEngine)
+set(SHARED ${CMAKE_CURRENT_SOURCE_DIR}/Shared)
 set(VEND ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 set(TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/Tools)
 
@@ -17,12 +18,14 @@ add_subdirectory(${VEND}/CLI11)
 include_directories(
         ${SRC}
         ${INC}
+        ${SHARED}
         ${VEND}
         ${VEND}/pugixml/src
         ${VEND}/CLI11/include
 )
 
 add_library(XenEngine STATIC
+        ${SHARED}/Panic.h
         ${INC}/Platform.h
         ${INC}/XenEngine.h
         ${SRC}/XenEngine.cpp
