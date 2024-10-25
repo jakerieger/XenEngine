@@ -37,10 +37,7 @@ target_link_libraries(XenEngine PRIVATE
         d2d1.lib
         d3d11.lib
         winmm.lib
-        #        yaml-cpp::yaml-cpp
 )
 
-add_executable(XnSimpleGame Examples/SimpleGame.cpp)
-target_link_libraries(XnSimpleGame PRIVATE XenEngine)
-
 add_subdirectory(${TOOLS}/XnPak)
+add_subdirectory(Examples/PicklePuncher)

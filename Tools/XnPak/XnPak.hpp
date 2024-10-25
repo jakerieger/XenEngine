@@ -11,7 +11,6 @@
 #include <Panic.hpp>
 #include <cstring>
 #include <pugixml.hpp>
-#include <ranges>
 #include <sstream>
 #include <algorithm>
 #include <fstream>
@@ -88,12 +87,28 @@ namespace Xen {
             return result;
         }
 
-        static Vector<u8> processFont(const str& filename) {
-            return {0, 0, 0, 1, 0, 0, 1, 1};
+        static Vector<u8> processPlainText(const str& filename) {
+            std::ifstream file(filename, std::ios::binary);
+            if (!file.is_open()) { Panic("Failed to open plain text file: %s", filename.c_str()); }
+
+            file.seekg(0, std::ios::end);
+            const std::streamsize size = file.tellg();
+            file.seekg(0, std::ios::beg);
+
+            Vector<u8> result(size);
+            if (!file.read(reinterpret_cast<char*>(result.data()), size)) {
+                Panic("Failed to read plain text file: %s", filename.c_str());
+            }
+
+            file.close();
+
+            return result;
         }
 
-        static Vector<u8> processPlainText(const str& filename) {
-            return {0, 0, 0, 1, 0, 0, 1, 1};
+        // Maybe in the future this can generate a sprite font or something, but for now
+        // it'll just read the TTF file directly as a byte array and return that.
+        static Vector<u8> processFont(const str& filename) {
+            return processPlainText(filename);
         }
     }  // namespace Processors
 

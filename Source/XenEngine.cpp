@@ -3,7 +3,6 @@
 //
 
 #include "XenEngine.hpp"
-#include "Platform.hpp"
 
 #include <iostream>
 
@@ -11,4 +10,4 @@ namespace Xen {
     void sayHello() {
         std::cout << "Hello World!\n";
     }
-}
+}  // namespace Xen

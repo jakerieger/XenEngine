@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<XenEngineApp name="PicklePuncher">
+    <!-- This should match the output directory specified in your content manifest file -->
+    <ContentDirectory>Content</ContentDirectory>
+</XenEngineApp>
