@@ -3,7 +3,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Tools)
 
 add_executable(XnPak
         ${SHARED}/Panic.h
-        XnPak.h
+        XnPak.hpp
         XnPak.cpp
         main.cpp
 )

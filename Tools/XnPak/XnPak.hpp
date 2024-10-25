@@ -8,7 +8,7 @@
 #include <Types/STL.h>
 #include <Types/Types.h>
 #include <Types/IO.h>
-#include <Panic.h>
+#include <Panic.hpp>
 #include <cstring>
 
 #include <pugixml.hpp>
@@ -17,6 +17,10 @@
 #include <algorithm>
 
 namespace Xen {
+    static void logStatus(const str& msg) {
+        std::cout << msg << '\n';
+    }
+
     enum class AssetType : u8 {
         Texture,
         Audio,
@@ -87,7 +91,42 @@ namespace Xen {
             }
         }
 
-        void build() {}
+        void build() {
+            logStatus("- Building manifest.");
+
+            // Get content output directory and create it.
+            // Relative paths are relative to the location of the manifest file.
+            const auto contentDir = Path(rootDir) / outputDir;
+            if (FileSystem::exists(contentDir)) { FileSystem::remove_all(contentDir); }
+            FileSystem::create_directory(contentDir);
+
+            std::cout << "  | Created output directory: " << contentDir << '\n';
+            std::cout << "  | Found " << assets.size() << " assets.\n";
+
+            auto assetCount = assets.size();
+            auto assetId    = 1;
+            for (auto& asset : assets) {
+                std::cout << "  | [" << assetId << "/" << assetCount
+                          << "] Building asset: " << asset.name << '\n';
+
+                str outputPath;
+                auto filename = asset.name;
+                auto split    = splitPath(filename);
+                // Name contains subdirectories, create them
+                if (split.size() > 1) {
+                    filename         = split.back();
+                    auto currentPath = Path(contentDir);
+                    for (int i = 0; i < split.size() - 1; i++) {
+                        currentPath /= split[i];
+                        if (!FileSystem::exists(currentPath)) {
+                            FileSystem::create_directory(currentPath);
+                        }
+                    }
+                }
+
+                assetId++;
+            }
+        }
 
         void clean() {}
 
@@ -100,6 +139,26 @@ namespace Xen {
         }
 
     private:
+        static Vector<str> splitPath(const str& path) {
+            Vector<str> result;
+            str current;
+
+            for (const char c : path) {
+                if (c == '/' || c == '\\') {
+                    if (!current.empty()) {
+                        result.push_back(current);
+                        current.clear();
+                    }
+                } else {
+                    current += c;
+                }
+            }
+
+            if (!current.empty()) { result.push_back(current); }
+
+            return result;
+        }
+
         static bool validateAsset(const pugi::xml_node& node) {
             if (strcmp(node.name(), "Asset") != 0) return false;
             if (node.attribute("name").empty()) return false;

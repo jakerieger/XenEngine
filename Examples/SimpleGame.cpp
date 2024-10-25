@@ -1,5 +1,5 @@
-#include "XenEngine.h"
-#include "Platform.h"
+#include "XenEngine.hpp"
+#include "Platform.hpp"
 
 int main() {
     Xen::sayHello();

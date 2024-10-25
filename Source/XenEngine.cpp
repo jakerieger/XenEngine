@@ -2,8 +2,8 @@
 // Created: 10/22/2024.
 //
 
-#include "XenEngine.h"
-#include "Platform.h"
+#include "XenEngine.hpp"
+#include "Platform.hpp"
 
 #include <iostream>
 

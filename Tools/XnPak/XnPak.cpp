@@ -2,6 +2,6 @@
 // Created: 10/23/2024.
 //
 
-#include "XnPak.h"
+#include "XnPak.hpp"
 
 namespace Xen {}  // namespace Xen

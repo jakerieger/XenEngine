@@ -2,10 +2,10 @@
 // Created: 10/24/2024.
 //
 
-#include "XnPak.h"
-#include "CLI/CLI.hpp"
+#include "XnPak.hpp"
 
-#include <Panic.h>
+#include <CLI/CLI.hpp>
+#include <Panic.hpp>
 
 int main(int argc, char* argv[]) {
     CLI::App app("XenEngine asset packing tool.", "XnPak");
