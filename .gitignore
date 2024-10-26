@@ -8,3 +8,5 @@ out/
 **/.vs/
 **/packages/
 **/Content/
+**/.mvn/
+**/target/
