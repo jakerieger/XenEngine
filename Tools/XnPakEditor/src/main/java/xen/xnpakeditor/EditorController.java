@@ -1,4 +1,4 @@
-package org.jakerieger.xnpakeditor;
+package xen.xnpakeditor;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -6,12 +6,13 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.w3c.dom.Document;
+import xen.xnpak.Manifest;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 
-public class XnPakEditorController {
+public class EditorController {
     public MenuBar mainMenu;
     public ToolBar toolBar;
     public TreeView contentTree;
@@ -40,7 +41,7 @@ public class XnPakEditorController {
 
     @FXML
     protected void onOpen() {
-        Stage stage = (Stage)openButton.getScene().getWindow();
+        Stage stage = (Stage) openButton.getScene().getWindow();
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Manifest");
@@ -54,37 +55,48 @@ public class XnPakEditorController {
     }
 
     @FXML
-    protected void onSave() {}
+    protected void onSave() {
+    }
 
     @FXML
-    protected void onSaveAs() {}
+    protected void onSaveAs() {
+    }
 
     @FXML
-    protected void onUndo() {}
+    protected void onUndo() {
+    }
 
     @FXML
-    protected void onRedo() {}
+    protected void onRedo() {
+    }
 
     @FXML
-    protected void onImportAsset() {}
+    protected void onImportAsset() {
+    }
 
     @FXML
-    protected void onNewAsset() {}
+    protected void onNewAsset() {
+    }
 
     @FXML
-    protected void onImportFolder() {}
+    protected void onImportFolder() {
+    }
 
     @FXML
-    protected void onNewFolder() {}
+    protected void onNewFolder() {
+    }
 
     @FXML
-    protected void onBuild() {}
+    protected void onBuild() {
+    }
 
     @FXML
-    protected void onRebuild() {}
+    protected void onRebuild() {
+    }
 
     @FXML
-    protected void onClean() {}
+    protected void onClean() {
+    }
 
     private void updateToolbarState() {
         if (editorState.selectedManifestPathProperty().get() != null) {
@@ -116,20 +128,16 @@ public class XnPakEditorController {
 
     private void loadManifest(String filename) {
         try {
-            File manifestFile = new File(filename);
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            Document doc = dBuilder.parse(manifestFile);
-
-            doc.getDocumentElement().normalize(); // No clue wtf this does
-            var root = doc.getDocumentElement();
-            // Parse manifest file (.....again)
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            var manifest = new Manifest(filename);
+            editorState.currentManifestProperty().setValue(manifest);
+            if (manifest.outputDir != null) {
+                System.out.println(manifest.toString());
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to load manifest");
             return;
         }
 
-        editorState.selectedManifestPathProperty().setValue(filename);
         updateToolbarState();
     }
 }

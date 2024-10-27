@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.jakerieger</groupId>
+    <groupId>xen</groupId>
     <artifactId>XnPakEditor</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>XnPakEditor</name>
@@ -61,7 +61,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                org.jakerieger.xnpakeditor/org.jakerieger.xnpakeditor.XnPakEditorApp
+                                org.jakerieger.xnpakeditor/xen.xnpakeditor.EditorApp
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>

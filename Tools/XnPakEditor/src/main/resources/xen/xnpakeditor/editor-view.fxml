@@ -5,7 +5,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<VBox prefHeight="750.0" prefWidth="1200.0" stylesheets="@editor-style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.jakerieger.xnpakeditor.XnPakEditorController">
+<VBox prefHeight="750.0" prefWidth="1200.0" stylesheets="@editor-style.css" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="xen.xnpakeditor.EditorController">
    <children>
       <MenuBar id="mainMenu" fx:id="mainMenu">
         <menus>

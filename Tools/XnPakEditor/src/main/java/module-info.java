@@ -4,6 +4,6 @@ module org.jakerieger.xnpakeditor {
     requires java.xml;
 
 
-    opens org.jakerieger.xnpakeditor to javafx.fxml;
-    exports org.jakerieger.xnpakeditor;
+    opens xen.xnpakeditor to javafx.fxml;
+    exports xen.xnpakeditor;
 }
