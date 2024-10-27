@@ -4,5 +4,5 @@ public enum AssetType {
     Texture,
     Audio,
     Font,
-    PlainText
+    Data
 }

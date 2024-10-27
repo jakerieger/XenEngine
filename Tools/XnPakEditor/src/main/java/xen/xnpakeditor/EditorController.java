@@ -11,6 +11,8 @@ import xen.xnpak.Manifest;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.PrintStream;
+import java.nio.file.Paths;
 
 public class EditorController {
     public MenuBar mainMenu;
@@ -36,7 +38,13 @@ public class EditorController {
 
     @FXML
     public void initialize() {
+        // Redirect Stdout to our Build Output panel
+        PrintStream printStream = new PrintStream(new TextAreaOutputStream(buildOutput));
+        System.setOut(printStream);
+        System.setErr(printStream);
         updateToolbarState();
+
+        System.out.println("(Info) XnPak Editor has been initialized.");
     }
 
     @FXML
@@ -88,6 +96,9 @@ public class EditorController {
 
     @FXML
     protected void onBuild() {
+        if (editorState.currentManifestProperty().get() != null) {
+            editorState.currentManifestProperty().get().build();
+        }
     }
 
     @FXML
@@ -96,10 +107,13 @@ public class EditorController {
 
     @FXML
     protected void onClean() {
+        if (editorState.currentManifestProperty().get() != null) {
+            editorState.currentManifestProperty().get().clean();
+        }
     }
 
     private void updateToolbarState() {
-        if (editorState.selectedManifestPathProperty().get() != null) {
+        if (editorState.currentManifestProperty().get() != null) {
             saveButton.setDisable(false);
             saveAsButton.setDisable(false);
             undoButton.setDisable(false);
@@ -131,7 +145,8 @@ public class EditorController {
             var manifest = new Manifest(filename);
             editorState.currentManifestProperty().setValue(manifest);
             if (manifest.outputDir != null) {
-                System.out.println(manifest.toString());
+                buildOutput.setText("");
+                System.out.println("(Info) Loaded manifest: " + Paths.get(filename).toAbsolutePath().toString());
             }
         } catch (Exception e) {
             System.err.println("Failed to load manifest");
