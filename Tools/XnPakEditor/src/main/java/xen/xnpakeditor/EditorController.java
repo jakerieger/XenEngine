@@ -54,7 +54,7 @@ public class EditorController {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Manifest");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("XnPak Manifest", "Content.manifest")
+                new FileChooser.ExtensionFilter("XnPak Manifest", "* .manifest")
         );
         var file = fileChooser.showOpenDialog(stage);
         if (file != null) {
@@ -98,6 +98,10 @@ public class EditorController {
     protected void onBuild() {
         if (editorState.currentManifestProperty().get() != null) {
             editorState.currentManifestProperty().get().build();
+            var msg = new Alert(Alert.AlertType.INFORMATION);
+            msg.setTitle("Build");
+            msg.setHeaderText("Manifest built successfully.");
+            msg.showAndWait();
         }
     }
 
@@ -140,6 +144,18 @@ public class EditorController {
         }
     }
 
+    private void updateContentTree() {
+        var manifest = editorState.currentManifestProperty().get();
+        if (manifest != null) {
+            var rootItem = new TreeItem<>(manifest.name.split("\\.")[0]);
+            contentTree.setRoot(rootItem);
+
+            var contextMenu = new ContextMenu();
+            contextMenu.getItems().addAll(new MenuItem("Import Asset"), new MenuItem("New Asset"), new MenuItem("Import Folder"), new MenuItem("New Folder"), new MenuItem("Build"));
+            contentTree.setContextMenu(contextMenu);
+        }
+    }
+
     private void loadManifest(String filename) {
         try {
             var manifest = new Manifest(filename);
@@ -153,6 +169,7 @@ public class EditorController {
             return;
         }
 
+        updateContentTree();
         updateToolbarState();
     }
 }

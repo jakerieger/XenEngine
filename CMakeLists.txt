@@ -39,5 +39,4 @@ target_link_libraries(XenEngine PRIVATE
         winmm.lib
 )
 
-add_subdirectory(${TOOLS}/XnPak)
 add_subdirectory(Examples/PicklePuncher)

@@ -16,11 +16,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Manifest {
+    public String name;
     public String rootDir;
     public String outputDir;
     public boolean compress;
@@ -32,6 +34,7 @@ public class Manifest {
         // Set the root directory
         var filePath = Paths.get(filename).toAbsolutePath();
         rootDir = filePath.getParent().toString();
+        name = filePath.getFileName().toString();
 
         // Parse the manifest file
         File file = new File(filePath.toString());
@@ -69,6 +72,9 @@ public class Manifest {
     }
 
     public void clean() {
+        System.out.println("(Info) Cleaning manifest.");
+        var _ = createContentDirectory();
+        System.out.println("(Info) Manifest cleaned.");
     }
 
     @Override
@@ -110,34 +116,22 @@ public class Manifest {
             // Import asset data
             ArrayList<Byte> data = new ArrayList<>();
             var srcPath = Paths.get(rootDir, asset.build);
-            switch (asset.type) {
-                case Texture -> {
-                    var bytes = AssetProcessors.processTexture(srcPath.toString());
-                    data.ensureCapacity(bytes.length);
-                    data.clear();
-                    for (byte b : bytes) {
-                        data.add(b);
-                    }
-                    data.trimToSize();
+            if (Objects.requireNonNull(asset.type) == AssetType.Texture) {
+                var bytes = AssetProcessors.processTexture(srcPath.toString());
+                data.ensureCapacity(bytes.length);
+                data.clear();
+                for (byte b : bytes) {
+                    data.add(b);
                 }
-                case Audio -> {
-                    var bytes = AssetProcessors.processAudio(srcPath.toString());
-                    data.ensureCapacity(bytes.length);
-                    data.clear();
-                    for (byte b : bytes) {
-                        data.add(b);
-                    }
-                    data.trimToSize();
+                data.trimToSize();
+            } else {
+                var bytes = AssetProcessors.processData(srcPath.toString());
+                data.ensureCapacity(bytes.length);
+                data.clear();
+                for (byte b : bytes) {
+                    data.add(b);
                 }
-                default -> {
-                    var bytes = AssetProcessors.processData(srcPath.toString());
-                    data.ensureCapacity(bytes.length);
-                    data.clear();
-                    for (byte b : bytes) {
-                        data.add(b);
-                    }
-                    data.trimToSize();
-                }
+                data.trimToSize();
             }
 
             // Write asset to pak file
@@ -150,6 +144,8 @@ public class Manifest {
                 System.err.println("(Error) Failed to create output file: " + outputFile);
                 return;
             }
+
+            assetId++;
         }
     }
 
@@ -157,13 +153,12 @@ public class Manifest {
     private String createContentDirectory() {
         var contentDir = Paths.get(rootDir, outputDir).toString();
         var cd = new File(contentDir);
+
         try {
-            // TODO: This fails because the content directory isn't empty.
-            // I need to walk the directory and delete each entry individually because Java sucks
-            // and doesn't have a recursive delete.
-            Files.deleteIfExists(cd.toPath());
+            cleanDirectories(cd.toPath());
         } catch (IOException e) {
-            System.err.println("(Error) Failed to delete directory: " + cd);
+            System.err.println("(Error) Failed to create directory: " + cd);
+            System.err.println("  | " + e.getMessage());
             return null;
         }
 
@@ -173,6 +168,24 @@ public class Manifest {
         }
 
         return contentDir;
+    }
+
+    private void cleanDirectories(Path root) throws IOException {
+        // I hate this so much :(
+        // Just give me rm rf
+        Files.walkFileTree(root, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     // Can you tell I normally write C?
