@@ -1,18 +1,18 @@
 package xen.xnpakeditor;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.w3c.dom.Document;
+import org.jetbrains.annotations.NotNull;
 import xen.xnpak.Manifest;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
 import java.io.PrintStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class EditorController {
     public MenuBar mainMenu;
@@ -35,6 +35,7 @@ public class EditorController {
     public Button cleanButton;
 
     private final EditorState editorState = EditorState.getInstance();
+    private final AtomicBoolean isBuilding = new AtomicBoolean(false);
 
     @FXML
     public void initialize() {
@@ -94,14 +95,40 @@ public class EditorController {
     protected void onNewFolder() {
     }
 
+    // TODO: Current blocking the UI, make this asynchronous.
     @FXML
     protected void onBuild() {
-        if (editorState.currentManifestProperty().get() != null) {
-            editorState.currentManifestProperty().get().build();
-            var msg = new Alert(Alert.AlertType.INFORMATION);
-            msg.setTitle("Build");
-            msg.setHeaderText("Manifest built successfully.");
-            msg.showAndWait();
+        if (editorState.currentManifestProperty().get() != null && !isBuilding.get()) {
+            isBuilding.set(true);
+
+            Task<Void> buildTask = new Task<>() {
+                @Override
+                protected Void call() {
+                    editorState.currentManifestProperty().get().build();
+                    return null;
+                }
+            };
+
+            buildTask.setOnSucceeded(event -> {
+                isBuilding.set(false);
+                var msg = new Alert(Alert.AlertType.INFORMATION);
+                msg.setTitle("Build");
+                msg.setHeaderText("Manifest built successfully.");
+                msg.showAndWait();
+            });
+
+            buildTask.setOnFailed(event -> {
+                isBuilding.set(false);
+                Throwable exception = buildTask.getException();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Build Error");
+                alert.setHeaderText("Error building manifest");
+                alert.setContentText(exception != null ? exception.getMessage() : "An unknown error occurred.");
+                alert.showAndWait();
+            });
+
+            // This runs the task on a background thread.
+            new Thread(buildTask).start();
         }
     }
 
@@ -115,6 +142,7 @@ public class EditorController {
             editorState.currentManifestProperty().get().clean();
         }
     }
+
 
     private void updateToolbarState() {
         if (editorState.currentManifestProperty().get() != null) {
@@ -144,15 +172,65 @@ public class EditorController {
         }
     }
 
+    @NotNull
+    private ArrayList<MenuItem> contextMenu() {
+        ArrayList<MenuItem> menuItems = new ArrayList<>();
+
+        var importAssetItem = new MenuItem("Import Asset");
+        importAssetItem.setOnAction(event -> {
+            onImportAsset();
+        });
+
+        var newAssetItem = new MenuItem("New Asset");
+        newAssetItem.setOnAction(event -> {
+            onNewAsset();
+        });
+
+        var importFolderItem = new MenuItem("Import Folder");
+        importFolderItem.setOnAction(event -> {
+            onImportFolder();
+        });
+
+        var newFolderItem = new MenuItem("New Folder");
+        newFolderItem.setOnAction(event -> {
+            onNewFolder();
+        });
+
+        var buildItem = new MenuItem("Build");
+        buildItem.setOnAction(event -> {
+            onBuild();
+        });
+
+        var cleanItem = new MenuItem("Clean");
+        cleanItem.setOnAction(event -> {
+            onClean();
+        });
+
+        menuItems.add(importAssetItem);
+        menuItems.add(newAssetItem);
+        menuItems.add(importFolderItem);
+        menuItems.add(newFolderItem);
+        menuItems.add(buildItem);
+        menuItems.add(cleanItem);
+
+        return menuItems;
+    }
+
     private void updateContentTree() {
         var manifest = editorState.currentManifestProperty().get();
         if (manifest != null) {
             var rootItem = new TreeItem<>(manifest.name.split("\\.")[0]);
             contentTree.setRoot(rootItem);
 
-            var contextMenu = new ContextMenu();
-            contextMenu.getItems().addAll(new MenuItem("Import Asset"), new MenuItem("New Asset"), new MenuItem("Import Folder"), new MenuItem("New Folder"), new MenuItem("Build"));
-            contentTree.setContextMenu(contextMenu);
+            var rootContextMenu = new ContextMenu();
+            rootContextMenu.getItems().addAll(contextMenu());
+            contentTree.setContextMenu(rootContextMenu);
+
+            for (var asset : manifest.assets) {
+                var treeItem = new TreeItem<>(asset.name);
+                treeItem.setExpanded(true);
+                rootItem.getChildren().add(treeItem);
+            }
         }
     }
 

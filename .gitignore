@@ -10,3 +10,5 @@ out/
 **/Content/
 **/.mvn/
 **/target/
+**/out/
+**/lib/

@@ -61,6 +61,9 @@ public class Manifest {
         }
     }
 
+    public void write() {
+    }
+
     public void build() {
         System.out.println("(Info) Building manifest.");
         var contentDir = createContentDirectory();
