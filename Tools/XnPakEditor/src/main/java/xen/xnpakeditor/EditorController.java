@@ -65,6 +65,9 @@ public class EditorController {
 
     @FXML
     protected void onSave() {
+        if (editorState.currentManifestProperty().get() != null) {
+            editorState.currentManifestProperty().get().write();
+        }
     }
 
     @FXML

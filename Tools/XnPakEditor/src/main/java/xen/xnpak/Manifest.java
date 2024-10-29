@@ -1,5 +1,7 @@
 package xen.xnpak;
 
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.Document;
@@ -8,14 +10,13 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ public class Manifest {
     public String outputDir;
     public boolean compress;
     public ArrayList<Asset> assets;
+    private Document doc;
+    private final String manifestPath;
 
     public Manifest(@NotBlank String filename) {
         assets = new ArrayList<>();
@@ -35,13 +38,14 @@ public class Manifest {
         var filePath = Paths.get(filename).toAbsolutePath();
         rootDir = filePath.getParent().toString();
         name = filePath.getFileName().toString();
+        manifestPath = filePath.toString();
 
         // Parse the manifest file
         File file = new File(filePath.toString());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(file);
+            doc = builder.parse(file);
 
             Element root = doc.getDocumentElement();
             outputDir = root.getElementsByTagName("OutputDir").item(0).getTextContent();
@@ -62,6 +66,17 @@ public class Manifest {
     }
 
     public void write() {
+        try {
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(new File(manifestPath));
+            transformer.transform(source, result);
+        } catch (TransformerException e) {
+            System.err.println("(Error) Failed to write manifest.\nReason: " + e.getMessage());
+        }
     }
 
     public void build() {
@@ -132,6 +147,27 @@ public class Manifest {
                 data.ensureCapacity(bytes.length);
                 data.clear();
                 for (byte b : bytes) {
+                    data.add(b);
+                }
+                data.trimToSize();
+            }
+
+            // Apply compression if requested
+            if (compress) {
+                byte[] src = new byte[data.size()];
+                for (int i = 0; i < data.size(); i++) {
+                    src[i] = data.get(i);
+                }
+                data.clear(); // We'll be copying the compressed data to here
+
+                // do compression
+                LZ4Factory factory = LZ4Factory.fastestInstance();
+                LZ4Compressor compressor = factory.highCompressor();
+                byte[] compressed = new byte[compressor.maxCompressedLength(src.length)];
+                int compressedLength = compressor.compress(src, 0, src.length, compressed, 0, compressor.maxCompressedLength(src.length));
+
+                data.ensureCapacity(src.length);
+                for (byte b : src) {
                     data.add(b);
                 }
                 data.trimToSize();
