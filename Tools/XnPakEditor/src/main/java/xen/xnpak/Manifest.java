@@ -166,8 +166,8 @@ public class Manifest {
                 byte[] compressed = new byte[compressor.maxCompressedLength(src.length)];
                 int compressedLength = compressor.compress(src, 0, src.length, compressed, 0, compressor.maxCompressedLength(src.length));
 
-                data.ensureCapacity(src.length);
-                for (byte b : src) {
+                data.ensureCapacity(compressed.length);
+                for (byte b : compressed) {
                     data.add(b);
                 }
                 data.trimToSize();
