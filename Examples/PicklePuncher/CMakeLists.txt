@@ -10,6 +10,7 @@ target_link_libraries(PicklePuncher PRIVATE
         XenEngine
 )
 
-#add_custom_command(TARGET XnPak PRE_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy_directory
-#        ${CMAKE_CURRENT_SOURCE_DIR}/Example ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Example)
+# This command will only succeed if XPak has been ran prior!
+add_custom_command(TARGET PicklePuncher PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/Content/Build ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Content)
