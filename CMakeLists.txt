@@ -13,16 +13,11 @@ set(SHARED ${CMAKE_CURRENT_SOURCE_DIR}/Shared)
 set(VEND ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 set(TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/Tools)
 
-add_subdirectory(${VEND}/pugixml)
-add_subdirectory(${VEND}/CLI11)
-
 include_directories(
         ${SRC}
         ${INC}
         ${SHARED}
         ${VEND}
-        ${VEND}/pugixml/src
-        ${VEND}/CLI11/include
 )
 
 add_library(XenEngine STATIC
@@ -32,11 +27,14 @@ add_library(XenEngine STATIC
         ${SRC}/XenEngine.cpp
 )
 
+find_package(sol2 CONFIG REQUIRED)
+find_package(lua CONFIG REQUIRED)
+find_package(pugixml CONFIG REQUIRED)
+
 target_link_libraries(XenEngine PRIVATE
-        dxgi.lib
-        d2d1.lib
-        d3d11.lib
-        winmm.lib
+        lua
+        sol2
+        pugixml::shared
 )
 
 add_subdirectory(Examples/PicklePuncher)

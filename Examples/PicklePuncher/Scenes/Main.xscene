@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Scene name="Main">
+    <GameObject name="Player" active="true">
+        <Transform x="4.0" y="3.6"/>
+        <Behavior script="Player.xscript" enabled="true"/>
+    </GameObject>
+</Scene>

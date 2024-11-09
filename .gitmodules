@@ -1,15 +1,6 @@
 [submodule "Vendor/Types"]
 	path = Vendor/Types
 	url = git@github.com:jakerieger/Types.git
-[submodule "Vendor/pugixml"]
-	path = Vendor/pugixml
-	url = https://github.com/zeux/pugixml.git
-[submodule "Vendor/CLI11"]
-	path = Vendor/CLI11
-	url = https://github.com/CLIUtils/CLI11
-[submodule "Vendor/sol2"]
-	path = Vendor/sol2
-	url = https://github.com/ThePhD/sol2.git
 [submodule "Tools/XPak"]
 	path = Tools/XPak
 	url = git@github.com:jakerieger/XPak.git

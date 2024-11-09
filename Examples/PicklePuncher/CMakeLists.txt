@@ -8,9 +8,20 @@ add_executable(PicklePuncher
 
 target_link_libraries(PicklePuncher PRIVATE
         XenEngine
+        lua
+        sol2
+        pugixml::shared
 )
 
 # This command will only succeed if XPak has been ran prior!
 add_custom_command(TARGET PicklePuncher PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/Content/Build ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Content)
+
+add_custom_command(TARGET PicklePuncher PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/Scripts ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Scripts)
+
+add_custom_command(TARGET PicklePuncher PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/Scenes ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Scenes)
