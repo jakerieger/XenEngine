@@ -37,4 +37,7 @@ target_link_libraries(XenEngine PRIVATE
         pugixml::shared
 )
 
+# TOOLS #
+add_subdirectory(Tools/XEditor)
+
 add_subdirectory(Examples/PicklePuncher)
