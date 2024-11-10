@@ -13,6 +13,7 @@
 #include <Panic.hpp>
 #include <Types/Types.h>
 #include <pugixml.hpp>
+#include <ranges>
 #include <utility>
 
 namespace Xen {
@@ -88,7 +89,7 @@ namespace Xen {
                     // Create transform component
                     const auto x                       = atof(transformNode.attribute("x").value());
                     const auto y                       = atof(transformNode.attribute("y").value());
-                    gameObject.Components["Transform"] = new Transform(x, y);
+                    gameObject.Components["Transform"] = new Transform((f32)x, (f32)y);
                 }
 
                 pugi::xml_node behaviorNode = go.child("Behavior");
@@ -141,9 +142,9 @@ namespace Xen {
         }
 
         void Awake(sol::state& scriptEngine) {
-            for (auto [name, go] : GameObjects) {
+            for (auto go : GameObjects | std::views::values) {
                 if (go.Components["Behavior"] != nullptr) {
-                    auto behavior = (Behavior*)go.Components["Behavior"];
+                    const auto behavior = (Behavior*)go.Components["Behavior"];
                     // Load lua script
                     std::cout << "Scripts/" << behavior->Script << std::endl;
                     scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
@@ -153,9 +154,9 @@ namespace Xen {
         }
 
         void Update(sol::state& scriptEngine, f32 dT) {
-            for (auto [name, go] : GameObjects) {
+            for (auto go : GameObjects | std::views::values) {
                 if (go.Components["Behavior"] != nullptr) {
-                    auto behavior = (Behavior*)go.Components["Behavior"];
+                    const auto behavior = (Behavior*)go.Components["Behavior"];
                     // Load lua script
                     scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
                     scriptEngine["onUpdate"](go, dT);
@@ -164,7 +165,7 @@ namespace Xen {
         }
 
         void Destroy() {
-            for (auto [name, go] : GameObjects) {
+            for (auto go : GameObjects | std::views::values) {
                 go.Destroy();
             }
         }

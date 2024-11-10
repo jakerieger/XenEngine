@@ -27,7 +27,7 @@ namespace XEditor {
             glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
 
-            window = glfwCreateWindow(width, height, "XEditor", nullptr, nullptr);
+            window = glfwCreateWindow(width, height, "XEditor — Untitled", nullptr, nullptr);
             if (!window) { Panic("Failed to create GLFW window"); }
 
             glfwMakeContextCurrent(window);

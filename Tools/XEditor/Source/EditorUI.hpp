@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "XenEngine.hpp"
+
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
 #include <imgui/backends/imgui_impl_opengl3.h>
@@ -12,7 +14,7 @@
 namespace XEditor {
     class EditorUI {
     public:
-        explicit EditorUI(GLFWwindow** window) {
+        explicit EditorUI(GLFWwindow** window) : activeScene("Untitled") {
             IMGUI_CHECKVERSION();
             ImGui::CreateContext();
             ImGuiIO& io = ImGui::GetIO();
@@ -66,20 +68,45 @@ namespace XEditor {
         }
 
         void Draw() {
+            ImGui::DockSpaceOverViewport(0,
+                                         ImGui::GetMainViewport(),
+                                         ImGuiDockNodeFlags_PassthruCentralNode);
+
             MainMenu();
             Toolbar();
             SceneTree();
             GameObjectInspector();
             SceneViewport();
+            DebugConsole();
         }
 
     private:
-        void MainMenu() {}
+        Xen::Scene activeScene;
+
+    private:
+        void MainMenu() {
+            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.f);
+
+            if (ImGui::BeginMainMenuBar()) {
+                if (ImGui::BeginMenu("File")) { ImGui::EndMenu(); }
+
+                if (ImGui::BeginMenu("Edit")) { ImGui::EndMenu(); }
+
+                if (ImGui::BeginMenu("View")) { ImGui::EndMenu(); }
+
+                if (ImGui::BeginMenu("Help")) { ImGui::EndMenu(); }
+
+                ImGui::EndMainMenuBar();
+            }
+
+            ImGui::PopStyleVar();
+        }
 
         void Toolbar() {}
 
         void SceneTree() {
-            ImGui::Begin("Scene");
+            ImGui::Begin("Hierarchy");
+            ImGui::Text("Name: %s", activeScene.Name.c_str());
             ImGui::End();
         }
 
@@ -89,7 +116,12 @@ namespace XEditor {
         }
 
         void SceneViewport() {
-            ImGui::Begin("Scene Preview");
+            ImGui::Begin("Scene");
+            ImGui::End();
+        }
+
+        void DebugConsole() {
+            ImGui::Begin("Messages");
             ImGui::End();
         }
     };
