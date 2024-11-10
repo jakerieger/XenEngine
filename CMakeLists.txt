@@ -13,6 +13,11 @@ set(SHARED ${CMAKE_CURRENT_SOURCE_DIR}/Shared)
 set(VEND ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 set(TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/Tools)
 
+set(GLAD_SRCS
+        ${VEND}/glad.c
+        ${VEND}/glad/glad.h
+)
+
 include_directories(
         ${SRC}
         ${INC}
@@ -30,11 +35,15 @@ add_library(XenEngine STATIC
 find_package(sol2 CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
+find_package(GLFW3 CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 target_link_libraries(XenEngine PRIVATE
         lua
         sol2
         pugixml::shared
+        glfw
+        glm::glm
 )
 
 # TOOLS #

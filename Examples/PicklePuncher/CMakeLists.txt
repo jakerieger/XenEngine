@@ -11,6 +11,7 @@ target_link_libraries(PicklePuncher PRIVATE
         lua
         sol2
         pugixml::shared
+        glfw
 )
 
 # This command will only succeed if XPak has been ran prior!
