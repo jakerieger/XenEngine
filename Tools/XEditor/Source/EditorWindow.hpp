@@ -4,15 +4,15 @@
 
 #pragma once
 
-#include "EditorUI.hpp"
-#include "Panic.hpp"
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <Types/Types.h>
 #include <Types/Cast.h>
 #include <Types/SmartPtr.h>
+
+#include "EditorUI.hpp"
+#include "Panic.hpp"
 
 namespace XEditor {
     class EditorWindow {
@@ -27,40 +27,46 @@ namespace XEditor {
             glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 #endif
 
-            window_ = glfwCreateWindow(width, height, "XEditor", nullptr, nullptr);
-            if (!window_) { Panic("Failed to create GLFW window"); }
+            window = glfwCreateWindow(width, height, "XEditor", nullptr, nullptr);
+            if (!window) { Panic("Failed to create GLFW window"); }
 
-            glfwMakeContextCurrent(window_);
+            glfwMakeContextCurrent(window);
 
             if (!gladLoadGLLoader(RCAST<GLADloadproc>(glfwGetProcAddress))) {
                 Panic("Failed to initialize OpenGL context");
             }
 
             glViewport(0, 0, width, height);
-            glfwSetFramebufferSizeCallback(window_, [](GLFWwindow*, int w, int h) {
+            glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int w, int h) {
                 glViewport(0, 0, w, h);
             });
 
             glfwSwapInterval(1);
 
-            ui_ = std::make_unique<EditorUI>();
+            ui = std::make_unique<EditorUI>(&window);
         }
 
         ~EditorWindow() {
-            ui_.reset();
-            if (window_) { glfwDestroyWindow(window_); }
+            ui.reset();
+            if (window) { glfwDestroyWindow(window); }
         }
 
         void Run() const {
-            while (!glfwWindowShouldClose(window_)) {
+            glClearColor(0.1f, 0.1f, 0.1f, 1.0);
+            while (!glfwWindowShouldClose(window)) {
                 glfwPollEvents();
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glfwSwapBuffers(window_);
+
+                EditorUI::BeginUI();
+                ui->Draw();
+                EditorUI::EndUI();
+
+                glfwSwapBuffers(window);
             }
         }
 
     private:
-        GLFWwindow* window_;
-        Unique<EditorUI> ui_;
+        GLFWwindow* window;
+        Unique<EditorUI> ui;
     };
 }  // namespace XEditor

@@ -18,11 +18,20 @@ set(GLAD_SRCS
         ${VEND}/glad/glad.h
 )
 
+file(GLOB IMGUI_SRCS
+        ${VEND}/imgui/*.h
+        ${VEND}/imgui/*.cpp
+        ${VEND}/imgui/backends/imgui_impl_glfw*
+        ${VEND}/imgui/backends/imgui_impl_opengl3*
+)
+
 include_directories(
         ${SRC}
         ${INC}
         ${SHARED}
         ${VEND}
+        ${VEND}/imgui
+        ${VEND}/imgui/backends
 )
 
 add_library(XenEngine STATIC

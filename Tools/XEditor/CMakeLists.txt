@@ -3,6 +3,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Tools/XEdit
 
 add_executable(XEditor
         ${GLAD_SRCS}
+        ${IMGUI_SRCS}
         ${SHARED}/Panic.hpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Source/main.cpp
         Source/EditorWindow.cpp
