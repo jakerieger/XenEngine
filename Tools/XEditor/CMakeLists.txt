@@ -19,4 +19,5 @@ target_link_libraries(XEditor PRIVATE
         pugixml::shared
         glfw
         glm::glm
+        tinyfiledialogs::tinyfiledialogs
 )

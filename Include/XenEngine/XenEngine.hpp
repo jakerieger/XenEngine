@@ -8,6 +8,7 @@
 #include <sol/sol.hpp>
 
 #define INC_DICTIONARY
+#define INC_VECTOR
 #include <Types/STL.h>
 
 #include <Panic.hpp>
@@ -47,6 +48,13 @@ namespace Xen {
         Dictionary<str, IComponent*> Components;
 
         GameObject() : Components({{}}) {}
+
+        void RemoveComponent(const str& name) {
+            auto it  = Components.find(name);
+            auto ptr = it->second;
+            delete ptr;
+            if (it != Components.end()) { Components.erase(it); }
+        }
 
         void Destroy() {
             for (auto it = Components.begin(); it != Components.end(); ++it) {

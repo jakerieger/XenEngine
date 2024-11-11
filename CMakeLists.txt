@@ -46,6 +46,7 @@ find_package(lua CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
 find_package(GLFW3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(tinyfiledialogs CONFIG REQUIRED)
 
 target_link_libraries(XenEngine PRIVATE
         lua
