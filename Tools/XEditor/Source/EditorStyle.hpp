@@ -52,12 +52,17 @@ namespace EditorStyle {
       const char* hex,
       const f32 alpha = 1.f) {  // Ensure the string starts with '#' and is the correct length
         if (std::strlen(hex) != 6) {
-            throw std::invalid_argument("Hex color should be in the format #RRGGBB");
+            throw std::invalid_argument("Hex color should be in the format 'RRGGBB'");
         }
 
         ImVec4 color;
-        int r, g, b;
-        sscanf(hex, "%02x%02x%02x", &r, &g, &b);
+        const char red[3]   = {hex[0], hex[1], '\0'};
+        const char green[3] = {hex[2], hex[3], '\0'};
+        const char blue[3]  = {hex[4], hex[5], '\0'};
+
+        const int r = strtol(red, nullptr, 16);
+        const int g = strtol(green, nullptr, 16);
+        const int b = strtol(blue, nullptr, 16);
 
         color.x = (float)r / 255.0f;
         color.y = (float)g / 255.0f;

@@ -3,5 +3,3 @@
 //
 
 #include "EditorUI.hpp"
-
-namespace XEditor {}  // namespace XEditor

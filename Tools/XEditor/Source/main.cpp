@@ -3,10 +3,6 @@
 //
 
 #include "EditorWindow.hpp"
-#include "XenEngine.hpp"
-
-using namespace XEditor;
-using namespace Xen;
 
 int main() {
     const EditorWindow editor(1300, 760);
