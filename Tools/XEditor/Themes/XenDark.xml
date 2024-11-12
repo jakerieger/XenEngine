@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Theme name="Xen Dark">
+    <WindowBackground>181818</WindowBackground>
+    <ChildBackground>212121</ChildBackground>
+    <FrameBackground>2D2D2D</FrameBackground>
+    <SecondaryBackground>363636</SecondaryBackground>
+    <HeaderBackground>040404</HeaderBackground>
+    <TextHighlight>FFFFFF</TextHighlight>
+    <TextPrimary>DADADA</TextPrimary>
+    <TextSecondary>B3B3B3</TextSecondary>
+    <TextDisabled>666666</TextDisabled>
+    <Border>363636</Border>
+    <Error>FF0000</Error>
+    <Warning>FFFF00</Warning>
+    <Success>00FF00</Success>
+    <Link>0000FF</Link>
+    <Scrollbar>353535</Scrollbar>
+    <Primary>6190e6</Primary>
+    <Secondary>585858</Secondary>
+    <BorderRadius>4.0</BorderRadius>
+    <BorderWidth>1.0</BorderWidth>
+    <Font>Inter-Regular.ttf</Font>
+</Theme>

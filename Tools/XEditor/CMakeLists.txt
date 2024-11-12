@@ -10,6 +10,8 @@ add_executable(XEditor
         Source/EditorWindow.hpp
         Source/EditorUI.cpp
         Source/EditorUI.hpp
+        Source/EditorStyle.hpp
+        Source/EditorStyle.cpp
 )
 
 target_link_libraries(XEditor PRIVATE
@@ -21,3 +23,7 @@ target_link_libraries(XEditor PRIVATE
         glm::glm
         tinyfiledialogs::tinyfiledialogs
 )
+
+add_custom_command(TARGET XEditor PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/Themes ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Themes)

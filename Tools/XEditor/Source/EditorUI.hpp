@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "EditorStyle.hpp"
 #include "XenEngine.hpp"
 
 #include <imgui/imgui.h>
@@ -27,10 +28,13 @@ namespace XEditor {
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
             io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
             io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;      // Enable Docking
-            // io.ConfigFlags |=
-            //   ImGuiConfigFlags_ViewportsEnable;  // Enable Multi-Viewport / Platform Windows
+            io.ConfigFlags |=
+              ImGuiConfigFlags_ViewportsEnable;  // Enable Multi-Viewport / Platform Windows
 
-            ImGui::StyleColorsDark();
+            // Load default theme
+            EditorStyle::LoadAndApplyStyle("XenDark.xml");
+
+            // ImGui::StyleColorsDark();
 
             // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can
             // look identical to regular ones.
@@ -63,13 +67,13 @@ namespace XEditor {
             // Update and Render additional Platform Windows
             // (Platform functions may change the current OpenGL context, so we save/restore it to
             // make it easier to paste this code elsewhere.
-            // const ImGuiIO& io = ImGui::GetIO();
-            // if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            //     GLFWwindow* backupCtx = glfwGetCurrentContext();
-            //     ImGui::UpdatePlatformWindows();
-            //     ImGui::RenderPlatformWindowsDefault();
-            //     glfwMakeContextCurrent(backupCtx);
-            // }
+            const ImGuiIO& io = ImGui::GetIO();
+            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+                GLFWwindow* backupCtx = glfwGetCurrentContext();
+                ImGui::UpdatePlatformWindows();
+                ImGui::RenderPlatformWindowsDefault();
+                glfwMakeContextCurrent(backupCtx);
+            }
         }
 
         void Draw() {
@@ -246,9 +250,6 @@ namespace XEditor {
                         ImGui::Text("Behavior");
                         ImGui::Text("Script: %s", ((Xen::Behavior*)component)->Script.c_str());
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            // gameObject.RemoveComponent("Behavior");
-                            //  I'll have to defer this until outside of this scope because ImGui is
-                            //  still trying to access that component
                             activeScene.GameObjects[selectedGameObject].RemoveComponent("Behavior");
                         }
                         ImGui::EndChild();
