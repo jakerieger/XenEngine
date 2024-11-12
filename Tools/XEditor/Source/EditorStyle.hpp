@@ -15,39 +15,6 @@
 #include <pugixml.hpp>
 
 namespace EditorStyle {
-    inline void HexToRGBA(const u32 hex, f32& r, f32& g, f32& b, f32& a) {
-        const u8 alphaByte = (hex >> 24) & 0xFF;
-        const u8 redByte   = (hex >> 16) & 0xFF;
-        const u8 greenByte = (hex >> 8) & 0xFF;
-        const u8 blueByte  = hex & 0xFF;
-
-        a = CAST<f32>(CAST<u32>(alphaByte) / 255.0);
-        r = CAST<f32>(CAST<u32>(redByte) / 255.0);
-        g = CAST<f32>(CAST<u32>(greenByte) / 255.0);
-        b = CAST<f32>(CAST<u32>(blueByte) / 255.0);
-    }
-
-    inline void HexToRGBA(const u32 hex, u32& r, u32& g, u32& b, u32& a) {
-        const u8 alphaByte = (hex >> 24) & 0xFF;
-        const u8 redByte   = (hex >> 16) & 0xFF;
-        const u8 greenByte = (hex >> 8) & 0xFF;
-        const u8 blueByte  = hex & 0xFF;
-
-        a = CAST<u32>(alphaByte);
-        r = CAST<u32>(redByte);
-        g = CAST<u32>(greenByte);
-        b = CAST<u32>(blueByte);
-    }
-
-    inline u32 RGBAToHex(const f32 r, const f32 g, const f32 b, const f32 a) {
-        const auto redByte   = CAST<u8>(r * 255.0f);
-        const auto greenByte = CAST<u8>(g * 255.0f);
-        const auto blueByte  = CAST<u8>(b * 255.0f);
-        const auto alphaByte = CAST<u8>(a * 255.0f);
-
-        return (alphaByte << 24) | (redByte << 16) | (greenByte << 8) | blueByte;
-    }
-
     inline ImVec4 HexToVec4(
       const char* hex,
       const f32 alpha = 1.f) {  // Ensure the string starts with '#' and is the correct length
@@ -71,21 +38,6 @@ namespace EditorStyle {
 
         return color;
     }
-
-    namespace Math {
-        template<typename T>
-        concept FiniteFloat = std::floating_point<T> && requires(T value) {
-            { std::isfinite(value) } -> std::convertible_to<bool>;
-        };
-
-        template<FiniteFloat T>
-        T Lerp(T a, T b, double t) {
-            if (a == b) { return a; }
-
-            auto result = a * (1.0 - t) + b * t;
-            return CAST<T>(result);
-        }
-    }  // namespace Math
 
     static void LoadAndApplyStyle(const char* filename) {
         // Parse XML file
@@ -195,7 +147,5 @@ namespace EditorStyle {
         styleColors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
         styleColors[ImGuiCol_NavWindowingDimBg]     = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         styleColors[ImGuiCol_ModalWindowDimBg]      = ImVec4(0.00f, 0.00f, 0.00f, 0.0f);
-
-        std::cout << "Loaded theme: " << themeName << std::endl;
     }
 }  // namespace EditorStyle

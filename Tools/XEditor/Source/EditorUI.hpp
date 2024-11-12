@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "EditorLog.h"
 #include "EditorStyle.hpp"
 #include "XenEngine.hpp"
 
@@ -81,6 +82,7 @@ public:
 
 private:
     GLFWwindow** editorWindow;
+    Logger logger;
 
     Xen::Scene activeScene;
     str activeSceneFile;
@@ -118,6 +120,8 @@ private:
                         activeScene     = Xen::Scene::Load(selectedFile);
                         activeSceneFile = selectedFile;
                         UpdateWindowTitle();
+
+                        logger.Log("Opened scene: " + activeScene.Name);
                     }
                 }
 
@@ -255,8 +259,17 @@ private:
                                   ImVec2(0, 0),
                                   ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                 // List of components
+                auto usedComponents =
+                  activeScene.GameObjects[selectedGameObject].GetComponentNames();
                 int idx = 0;
                 for (const auto& component : components) {
+                    if (std::ranges::any_of(usedComponents,
+                                            [&](const auto& name) { return name == component; })) {
+                        // Skip adding this component to the list since it has already been added to
+                        // the game object.
+                        continue;
+                    }
+
                     if (ImGui::Selectable(component.c_str(), idx == selectedComponentIndex)) {
                         // Update selected index
                         selectedComponentIndex = idx;
@@ -287,6 +300,13 @@ private:
 
     void Messages() {
         ImGui::Begin("Messages");
+
+        ImGui::BeginChild("Log Entries", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
+        for (auto& entry : logger.Entries) {
+            ImGui::Text(entry.ToString().c_str());
+        }
+        ImGui::EndChild();
+
         ImGui::End();
     }
 

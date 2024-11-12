@@ -56,6 +56,14 @@ namespace Xen {
             if (it != Components.end()) { Components.erase(it); }
         }
 
+        Vector<str> GetComponentNames() {
+            Vector<str> result;
+            for (const auto& name : Components | std::views::keys) {
+                result.push_back(name);
+            }
+            return result;
+        }
+
         void Destroy() {
             for (auto it = Components.begin(); it != Components.end(); ++it) {
                 delete it->second;
