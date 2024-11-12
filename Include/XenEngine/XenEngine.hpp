@@ -34,7 +34,7 @@ namespace Xen {
     class Behavior final : public IComponent {
     public:
         str Script;
-        Behavior() {};
+        Behavior() = default;
         explicit Behavior(str script) : Script(std::move(script)) {};
     };
 
@@ -57,8 +57,8 @@ namespace Xen {
         }
 
         void RemoveComponent(const str& name) {
-            auto it  = Components.find(name);
-            auto ptr = it->second;
+            const auto it  = Components.find(name);
+            const auto ptr = it->second;
             delete ptr;
             if (it != Components.end()) { Components.erase(it); }
         }
@@ -110,8 +110,9 @@ namespace Xen {
                 pugi::xml_node transformNode = go.child("Transform");
                 if (transformNode) {
                     // Create transform component
-                    const auto x                       = atof(transformNode.attribute("x").value());
-                    const auto y                       = atof(transformNode.attribute("y").value());
+                    char* end;
+                    const auto x = strtod(transformNode.attribute("x").value(), &end);
+                    const auto y = strtod(transformNode.attribute("y").value(), &end);
                     gameObject.Components["Transform"] = new Transform((f32)x, (f32)y);
                 }
 
