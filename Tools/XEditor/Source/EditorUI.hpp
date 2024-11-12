@@ -278,7 +278,15 @@ private:
                 }
                 ImGui::EndChild();
 
-                if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+                if (ImGui::Button("OK", ImVec2(120, 0))) {
+                    // Behavior
+                    if (selectedComponentIndex == 0) {
+                        activeScene.GameObjects[selectedGameObject].AddComponent<Xen::Behavior>(
+                          "Behavior");
+                    }
+
+                    ImGui::CloseCurrentPopup();
+                }
                 ImGui::SameLine();
                 if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                 ImGui::EndPopup();

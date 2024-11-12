@@ -34,6 +34,7 @@ namespace Xen {
     class Behavior final : public IComponent {
     public:
         str Script;
+        Behavior() {};
         explicit Behavior(str script) : Script(std::move(script)) {};
     };
 
@@ -48,6 +49,12 @@ namespace Xen {
         Dictionary<str, IComponent*> Components;
 
         GameObject() : Components({{}}) {}
+
+        template<typename T>
+            requires std::is_base_of_v<IComponent, T>
+        void AddComponent(const str& name) {
+            Components.insert_or_assign(name, new T());
+        }
 
         void RemoveComponent(const str& name) {
             auto it  = Components.find(name);
