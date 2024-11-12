@@ -16,6 +16,11 @@
 
 #define EXIT_CODE_QUIT 69
 
+struct ComponentOption {
+    str Name;
+    bool Available;
+};
+
 class EditorUI {
 public:
     explicit EditorUI(GLFWwindow** window) : activeScene("Untitled") {
@@ -92,15 +97,15 @@ private:
     char currentSceneName[64]  = {'\0'};
     char newGameObjectName[64] = {'\0'};
     str selectedGameObject;
-    Vector<str> components     = {"Behavior",
-                                  "Sprite Renderer",
-                                  "Rigidbody",
-                                  "Box Collider",
-                                  "Circle Collider",
-                                  "Polygon Collider",
-                                  "Camera",
-                                  "Audio Player"};
-    int selectedComponentIndex = -1;
+    Vector<str> components = {"Behavior",
+                              "Sprite Renderer",
+                              "Rigidbody",
+                              "Box Collider",
+                              "Circle Collider",
+                              "Polygon Collider",
+                              "Camera",
+                              "Audio Source"};
+    str selectedComponent;
 
 private:
     void MainMenu() {
@@ -244,10 +249,90 @@ private:
                     }
                     ImGui::EndChild();
                 }
+
+                if (name == "Sprite Renderer") {
+                    ImGui::BeginChild("Sprite Renderer",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Sprite Renderer");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent(
+                          "Sprite Renderer");
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (name == "Rigidbody") {
+                    ImGui::BeginChild("Rigidbody",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Rigidbody");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent("Rigidbody");
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (name == "Box Collider") {
+                    ImGui::BeginChild("Box Collider",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Box Collider");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent("Box Collider");
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (name == "Circle Collider") {
+                    ImGui::BeginChild("Circle Collider",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Circle Collider");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent(
+                          "Circle Collider");
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (name == "Polygon Collider") {
+                    ImGui::BeginChild("Polygon Collider",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Polygon Collider");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent(
+                          "Polygon Collider");
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (name == "Camera") {
+                    ImGui::BeginChild("Camera",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Camera");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent("Camera");
+                    }
+                    ImGui::EndChild();
+                }
+
+                if (name == "Audio Source") {
+                    ImGui::BeginChild("Audio Source",
+                                      ImVec2(0, 0),
+                                      ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
+                    ImGui::Text("Audio Source");
+                    if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
+                        activeScene.GameObjects[selectedGameObject].RemoveComponent("Audio Source");
+                    }
+                    ImGui::EndChild();
+                }
             }
 
             if (ImGui::Button("Add Component", ImVec2(ImGui::GetContentRegionAvail().x, 32))) {
-                selectedComponentIndex = 0;
+                selectedComponent = "";
                 ImGui::OpenPopup("Add new Component");
             }
 
@@ -261,7 +346,6 @@ private:
                 // List of components
                 auto usedComponents =
                   activeScene.GameObjects[selectedGameObject].GetComponentNames();
-                int idx = 0;
                 for (const auto& component : components) {
                     if (std::ranges::any_of(usedComponents,
                                             [&](const auto& name) { return name == component; })) {
@@ -270,20 +354,17 @@ private:
                         continue;
                     }
 
-                    if (ImGui::Selectable(component.c_str(), idx == selectedComponentIndex)) {
+                    if (ImGui::Selectable(component.c_str(), component == selectedComponent)) {
                         // Update selected index
-                        selectedComponentIndex = idx;
+                        selectedComponent = component;
                     }
-                    idx++;
                 }
                 ImGui::EndChild();
 
                 if (ImGui::Button("OK", ImVec2(120, 0))) {
-                    // Behavior
-                    if (selectedComponentIndex == 0) {
-                        activeScene.GameObjects[selectedGameObject].AddComponent<Xen::Behavior>(
-                          "Behavior");
-                    }
+                    try {
+                        activeScene.GameObjects[selectedGameObject].AddComponent(selectedComponent);
+                    } catch (std::runtime_error& ex) { Panic(ex.what()); }
 
                     ImGui::CloseCurrentPopup();
                 }

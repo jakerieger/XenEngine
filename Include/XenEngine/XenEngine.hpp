@@ -10,18 +10,26 @@
 #define INC_DICTIONARY
 #define INC_VECTOR
 #include <Types/STL.h>
+#include <Types/Cast.h>
+#include <Types/SmartPtr.h>
 
 #include <Panic.hpp>
 #include <Types/Types.h>
 #include <pugixml.hpp>
 #include <ranges>
+#include <typeindex>
 #include <utility>
 
 namespace Xen {
-
     class IComponent {
     public:
         virtual ~IComponent() = default;
+
+        template<typename T>
+            requires std::is_base_of_v<IComponent, T>
+        T* As() {
+            return DCAST<T*>(this);
+        }
     };
 
     class Transform final : public IComponent {
@@ -41,6 +49,50 @@ namespace Xen {
     class SpriteRenderer final : public IComponent {
     public:
         SpriteRenderer() = default;
+        void Draw() const {}
+    };
+
+    class Rigidbody final : public IComponent {
+    public:
+        Rigidbody() = default;
+    };
+
+    class BoxCollider final : public IComponent {
+    public:
+        BoxCollider() = default;
+    };
+
+    class CircleCollider final : public IComponent {
+    public:
+        CircleCollider() = default;
+    };
+
+    class PolygonCollider final : public IComponent {
+    public:
+        PolygonCollider() = default;
+    };
+
+    class Camera final : public IComponent {
+    public:
+        Camera() = default;
+    };
+
+    class AudioSource final : public IComponent {
+    public:
+        AudioSource() = default;
+    };
+
+    // TODO: I may or may not keep this... idk yet
+    static const Dictionary<str, std::function<IComponent*()>> ComponentFactory = {
+      {"Transform", []() { return new Transform(); }},
+      {"Behavior", []() { return new Behavior(); }},
+      {"Sprite Renderer", []() { return new SpriteRenderer(); }},
+      {"Rigidbody", []() { return new Rigidbody(); }},
+      {"Box Collider", []() { return new BoxCollider(); }},
+      {"Circle Collider", []() { return new CircleCollider(); }},
+      {"Polygon Collider", []() { return new PolygonCollider(); }},
+      {"Camera", []() { return new Camera(); }},
+      {"Audio Source", []() { return new AudioSource(); }},
     };
 
     class GameObject {
@@ -50,15 +102,22 @@ namespace Xen {
 
         GameObject() : Components({{}}) {}
 
-        template<typename T>
-            requires std::is_base_of_v<IComponent, T>
         void AddComponent(const str& name) {
-            Components.insert_or_assign(name, new T());
+            const auto componentFactory = ComponentFactory.find(name);
+            if (componentFactory == ComponentFactory.end()) {
+                throw std::runtime_error("Component not found");
+            }
+            const auto constructor = componentFactory->second;
+            const auto component   = constructor();
+            Components.insert_or_assign(name, component);
         }
 
         void RemoveComponent(const str& name) {
             const auto it  = Components.find(name);
             const auto ptr = it->second;
+            // All components **SHOULD** get cleaned up here.
+            // I still need to implement memory tracking so the dev can
+            // monitor memory usage in the editor and check for leaks.
             delete ptr;
             if (it != Components.end()) { Components.erase(it); }
         }
@@ -157,7 +216,7 @@ namespace Xen {
                     if (compIter->first == "Behavior") {
                         auto behaveRoot = goRoot.append_child("Behavior");
                         auto scriptAttr = behaveRoot.append_attribute("script");
-                        scriptAttr.set_value(((Behavior*)compIter->second)->Script.c_str());
+                        scriptAttr.set_value(compIter->second->As<Behavior>()->Script.c_str());
                     }
                 }
             }
@@ -168,9 +227,7 @@ namespace Xen {
         void Awake(sol::state& scriptEngine) {
             for (auto go : GameObjects | std::views::values) {
                 if (go.Components["Behavior"] != nullptr) {
-                    const auto behavior = (Behavior*)go.Components["Behavior"];
-                    // Load lua script
-                    std::cout << "Scripts/" << behavior->Script << std::endl;
+                    const auto behavior = go.Components["Behavior"]->As<Behavior>();
                     scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
                     scriptEngine["onAwake"](go);
                 }
@@ -180,10 +237,18 @@ namespace Xen {
         void Update(sol::state& scriptEngine, f32 dT) {
             for (auto go : GameObjects | std::views::values) {
                 if (go.Components["Behavior"] != nullptr) {
-                    const auto behavior = (Behavior*)go.Components["Behavior"];
-                    // Load lua script
+                    const auto behavior = go.Components["Behavior"]->As<Behavior>();
                     scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
                     scriptEngine["onUpdate"](go, dT);
+                }
+            }
+        }
+
+        void Draw(sol::state& scriptEngine) {
+            for (auto go : GameObjects | std::views::values) {
+                if (go.Components["Sprite Renderer"] != nullptr) {
+                    const auto renderer = go.Components["Sprite Renderer"]->As<SpriteRenderer>();
+                    renderer->Draw();
                 }
             }
         }
