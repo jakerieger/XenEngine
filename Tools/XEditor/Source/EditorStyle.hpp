@@ -146,7 +146,7 @@ namespace EditorStyle {
         styleColors[ImGuiCol_TitleBgActive]        = frameBackground;
         styleColors[ImGuiCol_TitleBgCollapsed]     = frameBackground;
         styleColors[ImGuiCol_MenuBarBg]            = windowBackground;
-        styleColors[ImGuiCol_ScrollbarBg]          = secondaryBackground;
+        styleColors[ImGuiCol_ScrollbarBg]          = windowBackground;
         styleColors[ImGuiCol_ScrollbarGrab]        = scrollbar;
         styleColors[ImGuiCol_ScrollbarGrabHovered] = scrollbar;
         styleColors[ImGuiCol_ScrollbarGrabActive]  = scrollbar;
@@ -154,12 +154,12 @@ namespace EditorStyle {
         styleColors[ImGuiCol_SliderGrab]           = scrollbar;
         styleColors[ImGuiCol_SliderGrabActive]     = scrollbar;
         styleColors[ImGuiCol_Button]               = secondary;
-        styleColors[ImGuiCol_ButtonHovered]        = secondary;
-        styleColors[ImGuiCol_ButtonActive]         = secondary;
-        styleColors[ImGuiCol_Header]               = secondaryBackground;
-        styleColors[ImGuiCol_HeaderHovered]        = headerBackground;
-        styleColors[ImGuiCol_HeaderActive]         = headerBackground;
-        styleColors[ImGuiCol_Separator]            = border;
+        styleColors[ImGuiCol_ButtonHovered] = ImVec4(secondary.x, secondary.y, secondary.z, 0.75f);
+        styleColors[ImGuiCol_ButtonActive]  = ImVec4(secondary.x, secondary.y, secondary.z, 0.60f);
+        styleColors[ImGuiCol_Header]        = secondaryBackground;
+        styleColors[ImGuiCol_HeaderHovered] = headerBackground;
+        styleColors[ImGuiCol_HeaderActive]  = headerBackground;
+        styleColors[ImGuiCol_Separator]     = border;
         styleColors[ImGuiCol_SeparatorHovered]     = link;
         styleColors[ImGuiCol_SeparatorActive]      = link;
         styleColors[ImGuiCol_ResizeGrip]           = ImVec4(0.26f, 0.59f, 0.98f, 0.20f);

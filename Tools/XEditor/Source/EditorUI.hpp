@@ -177,9 +177,8 @@ namespace XEditor {
             ImGui::Begin("Hierarchy");
 
             ImGui::Text(activeScene.Name.c_str());
-            if (ImGui::Button("Add GameObject", ImVec2(ImGui::GetContentRegionAvail().x, 32))) {
-                ImGui::OpenPopup("Add new GameObject");
-            }
+            ImGui::SameLine(ImGui::GetColumnWidth() - 24);
+            if (ImGui::Button("+", ImVec2(32, 32))) { ImGui::OpenPopup("Add new GameObject"); }
 
             // GameObject tree
             ImGui::BeginChild("GameObjects", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
