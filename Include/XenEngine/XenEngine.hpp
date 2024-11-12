@@ -4,11 +4,14 @@
 
 #pragma once
 
+#include <glad/glad.h>
+
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
 #define INC_DICTIONARY
 #define INC_VECTOR
+
 #include <Types/STL.h>
 #include <Types/Cast.h>
 #include <Types/SmartPtr.h>
@@ -21,6 +24,31 @@
 #include <utility>
 
 namespace Xen {
+    namespace OpenGL {
+        class Shader {};
+
+        class Texture {
+        public:
+            explicit Texture(const char* filename) : id(0) {
+                LoadFromFile(filename);
+            }
+
+            ~Texture() {
+                glDeleteTextures(1, &id);
+            }
+
+            void Bind() const {
+                glBindTexture(GL_TEXTURE_2D, id);
+            }
+
+        private:
+            GLuint id;
+            void LoadFromFile(const char* filename) {
+                // Pull code for this from NuggetGame or similar
+            }
+        };
+    }  // namespace OpenGL
+
     class IComponent {
     public:
         virtual ~IComponent() = default;
@@ -34,9 +62,14 @@ namespace Xen {
 
     class Transform final : public IComponent {
     public:
-        explicit Transform(f32 x = 0, f32 y = 0) : X(x), Y(y) {};
+        explicit Transform(f32 x = 0, f32 y = 0)
+            : X(x), Y(y), RotationX(0), RotationY(0), ScaleX(1), ScaleY(1) {};
         f32 X;
         f32 Y;
+        f32 RotationX;
+        f32 RotationY;
+        f32 ScaleX;
+        f32 ScaleY;
     };
 
     class Behavior final : public IComponent {
@@ -48,8 +81,14 @@ namespace Xen {
 
     class SpriteRenderer final : public IComponent {
     public:
-        SpriteRenderer() = default;
+        explicit SpriteRenderer() : shader(nullptr), texture({}), VAO(0), VBO(0) {};
         void Draw() const {}
+
+    private:
+        Unique<OpenGL::Shader> shader;
+        OpenGL::Texture texture;
+        GLuint VAO, VBO;
+        void Initialize() {}
     };
 
     class Rigidbody final : public IComponent {
