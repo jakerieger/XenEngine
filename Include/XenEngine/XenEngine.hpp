@@ -255,7 +255,7 @@ namespace Xen {
                 if (behaviorNode) {
                     const auto& component = gameObject.AddComponent("Behavior");
                     const auto behavior   = component->As<Behavior>();
-                    behavior->Script      = behaviorNode.attribute("script").value();
+                    behavior->Script      = behaviorNode.child_value("Script");
                 }
 
                 // TODO: Add the rest of the nodes
