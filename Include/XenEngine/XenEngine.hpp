@@ -258,6 +258,8 @@ namespace Xen {
                     behavior->Script      = behaviorNode.attribute("script").value();
                 }
 
+                // TODO: Add the rest of the nodes
+
                 // Add to scene
                 scene.GameObjects.insert_or_assign(goName, std::move(gameObject));
             }

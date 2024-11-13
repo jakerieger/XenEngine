@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<Scene name="Main">
+	<GameObject name="Player" active="true">
+		<SpriteRenderer />
+		<Transform>
+			<Position x="0" y="0" />
+			<Rotation x="0" y="0" />
+			<Scale x="1" y="1" />
+		</Transform>
+		<Behavior>
+			<Script />
+		</Behavior>
+		<Rigidbody />
+		<BoxCollider />
+	</GameObject>
+</Scene>
