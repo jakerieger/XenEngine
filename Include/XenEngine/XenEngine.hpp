@@ -286,11 +286,11 @@ namespace Xen {
                     const auto& [name, component] = *compIter;
 
                     if (name == "Transform") {
-                        auto transform     = component->As<Transform>();
-                        auto transformRoot = goRoot.append_child("Transform");
-                        auto positionNode  = transformRoot.append_child("Position");
-                        auto rotationNode  = transformRoot.append_child("Rotation");
-                        auto scaleNode     = transformRoot.append_child("Scale");
+                        const auto transform = component->As<Transform>();
+                        auto transformRoot   = goRoot.append_child("Transform");
+                        auto positionNode    = transformRoot.append_child("Position");
+                        auto rotationNode    = transformRoot.append_child("Rotation");
+                        auto scaleNode       = transformRoot.append_child("Scale");
                         {  // Position
                             auto xAttr = positionNode.append_attribute("x");
                             auto yAttr = positionNode.append_attribute("y");
@@ -310,9 +310,9 @@ namespace Xen {
                             yAttr.set_value(transform->ScaleY);
                         }
                     } else if (name == "Behavior") {
-                        auto behavior     = component->As<Behavior>();
-                        auto behaviorRoot = goRoot.append_child("Behavior");
-                        auto scriptNode   = behaviorRoot.append_child("Script");
+                        const auto behavior = component->As<Behavior>();
+                        auto behaviorRoot   = goRoot.append_child("Behavior");
+                        auto scriptNode     = behaviorRoot.append_child("Script");
                         scriptNode.set_value(behavior->Script.c_str());
                     } else if (name == "Sprite Renderer") {
                         auto spriteRenderer     = component->As<SpriteRenderer>();
