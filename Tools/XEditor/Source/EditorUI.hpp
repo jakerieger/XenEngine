@@ -77,7 +77,7 @@ public:
             for (const auto& go : activeScene.GameObjects | std::views::values) {
                 if (auto component = go.Components.find("Sprite Renderer");
                     component != go.Components.end()) {
-                    const auto [_, renderer] = *component;
+                    const auto& [_, renderer] = *component;
                     renderer->As<Xen::SpriteRenderer>()->Draw();
                 }
             }
@@ -89,9 +89,9 @@ public:
 
         MainMenu();
         Toolbar();
-        SceneTree();
-        GameObjectInspector();
-        SceneViewport();
+        Hierarchy();
+        Inspector();
+        Scene();
         ContentBrowser();
         Messages();
     }
@@ -133,7 +133,7 @@ private:
                       tinyfd_openFileDialog(title, "", 2, patterns, nullptr, 0);
 
                     if (selectedFile) {
-                        activeScene     = Xen::Scene::Load(selectedFile);
+                        activeScene     = std::move(Xen::Scene::Load(selectedFile));
                         activeSceneFile = selectedFile;
                         UpdateWindowTitle();
 
@@ -173,7 +173,7 @@ private:
 
                 if (ImGui::Button("OK", ImVec2(120, 0))) {
                     if (newSceneName[0] != '\0') {
-                        activeScene     = Xen::Scene(newSceneName);
+                        activeScene     = std::move(Xen::Scene(newSceneName));
                         activeSceneFile = "";
                         UpdateWindowTitle();
                         SaveSceneToFile();
@@ -191,7 +191,7 @@ private:
 
     void Toolbar() {}
 
-    void SceneTree() {
+    void Hierarchy() {
         ImGui::Begin("Hierarchy");
 
         ImGui::AlignTextToFramePadding();
@@ -217,10 +217,12 @@ private:
 
             if (ImGui::Button("OK", ImVec2(120, 0))) {
                 if (!activeScene.Name.empty()) {
-                    activeScene.GameObjects.insert_or_assign(newGameObjectName, Xen::GameObject());
-                    activeScene.GameObjects[newGameObjectName].Components.insert_or_assign(
-                      "Transform",
-                      new Xen::Transform());
+                    activeScene.GameObjects.insert_or_assign(newGameObjectName,
+                                                             std::move(Xen::GameObject()));
+                    auto go = activeScene.GameObjects.find(newGameObjectName);
+                    if (go == activeScene.GameObjects.end()) { return; }
+                    auto& [name, gameObject] = *go;
+                    gameObject.AddComponent("Transform");
                 }
 
                 ImGui::CloseCurrentPopup();
@@ -233,15 +235,16 @@ private:
         ImGui::End();
     }
 
-    void GameObjectInspector() {
+    void Inspector() {
         ImGui::Begin("Inspector");
 
         if (!selectedGameObject.empty()) {
             ImGui::Text("Name: %s", selectedGameObject.c_str());
-            auto gameObject = activeScene.GameObjects[selectedGameObject];
-            for (auto& [name, component] : gameObject.Components) {
+            auto gameObject  = activeScene.GameObjects.find(selectedGameObject);
+            auto& [name, go] = *gameObject;
+            for (auto& [name, component] : go.Components) {
                 if (name == "Transform") {
-                    if (ImGui::CollapsingHeader("Transform")) {
+                    if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Transform",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
@@ -271,103 +274,100 @@ private:
                 }
 
                 if (name == "Behavior") {
-                    if (ImGui::CollapsingHeader("Behavior")) {
+                    if (ImGui::CollapsingHeader("Behavior", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Behavior",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
-                        ImGui::Text("Script: %s", ((Xen::Behavior*)component)->Script.c_str());
+                        ImGui::Text("Script: %s", component->As<Xen::Behavior>()->Script.c_str());
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent("Behavior");
+                            go.RemoveComponent("Behavior");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Sprite Renderer") {
-                    if (ImGui::CollapsingHeader("Sprite Renderer")) {
+                    if (ImGui::CollapsingHeader("Sprite Renderer",
+                                                ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Sprite Renderer",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent(
-                              "Sprite Renderer");
+                            go.RemoveComponent("Sprite Renderer");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Rigidbody") {
-                    if (ImGui::CollapsingHeader("Rigidbody")) {
+                    if (ImGui::CollapsingHeader("Rigidbody", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Rigidbody",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent(
-                              "Rigidbody");
+                            go.RemoveComponent("Rigidbody");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Box Collider") {
-                    if (ImGui::CollapsingHeader("Box Collider")) {
+                    if (ImGui::CollapsingHeader("Box Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Box Collider",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent(
-                              "Box Collider");
+                            go.RemoveComponent("Box Collider");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Circle Collider") {
-                    if (ImGui::CollapsingHeader("Circle Collider")) {
+                    if (ImGui::CollapsingHeader("Circle Collider",
+                                                ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Circle Collider",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent(
-                              "Circle Collider");
+                            go.RemoveComponent("Circle Collider");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Polygon Collider") {
-                    if (ImGui::CollapsingHeader("Polygon Collider")) {
+                    if (ImGui::CollapsingHeader("Polygon Collider",
+                                                ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Polygon Collider",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent(
-                              "Polygon Collider");
+                            go.RemoveComponent("Polygon Collider");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Camera") {
-                    if (ImGui::CollapsingHeader("Camera")) {
+                    if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Camera",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent("Camera");
+                            go.RemoveComponent("Camera");
                         }
                         ImGui::EndChild();
                     }
                 }
 
                 if (name == "Audio Source") {
-                    if (ImGui::CollapsingHeader("Audio Source")) {
+                    if (ImGui::CollapsingHeader("Audio Source", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Audio Source",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            activeScene.GameObjects[selectedGameObject].RemoveComponent(
-                              "Audio Source");
+                            go.RemoveComponent("Audio Source");
                         }
                         ImGui::EndChild();
                     }
@@ -387,13 +387,11 @@ private:
                                   ImVec2(0, 0),
                                   ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                 // List of components
-                auto usedComponents =
-                  activeScene.GameObjects[selectedGameObject].GetComponentNames();
+                auto usedComponents = go.GetComponentNames();
                 for (const auto& component : components) {
-                    if (std::ranges::any_of(usedComponents,
-                                            [&](const auto& name) { return name == component; })) {
-                        // Skip adding this component to the list since it has already been added to
-                        // the game object.
+                    if (std::ranges::any_of(usedComponents, [&](const auto& compName) {
+                            return compName == component;
+                        })) {
                         continue;
                     }
 
@@ -406,7 +404,7 @@ private:
 
                 if (ImGui::Button("OK", ImVec2(120, 0))) {
                     try {
-                        activeScene.GameObjects[selectedGameObject].AddComponent(selectedComponent);
+                        go.AddComponent(selectedComponent);
                     } catch (std::runtime_error& ex) { Panic(ex.what()); }
 
                     ImGui::CloseCurrentPopup();
@@ -420,7 +418,7 @@ private:
         ImGui::End();
     }
 
-    void SceneViewport() {
+    void Scene() {
         ImGui::Begin("Scene");
         ImGui::End();
     }

@@ -50,7 +50,7 @@ public:
     }
 
     void Run() const {
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0);
+        glClearColor(0.f, 0.f, 0.f, 1.0);
         while (!glfwWindowShouldClose(window)) {
             glfwPollEvents();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

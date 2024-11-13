@@ -17,6 +17,7 @@
 #include <Types/SmartPtr.h>
 
 #include <Panic.hpp>
+#include <filesystem>
 #include <Types/Types.h>
 #include <pugixml.hpp>
 #include <ranges>
@@ -121,44 +122,56 @@ namespace Xen {
         AudioSource() = default;
     };
 
-    // TODO: I may or may not keep this... idk yet
-    static const Dictionary<str, std::function<IComponent*()>> ComponentFactory = {
-      {"Transform", []() { return new Transform(); }},
-      {"Behavior", []() { return new Behavior(); }},
-      {"Sprite Renderer", []() { return new SpriteRenderer(); }},
-      {"Rigidbody", []() { return new Rigidbody(); }},
-      {"Box Collider", []() { return new BoxCollider(); }},
-      {"Circle Collider", []() { return new CircleCollider(); }},
-      {"Polygon Collider", []() { return new PolygonCollider(); }},
-      {"Camera", []() { return new Camera(); }},
-      {"Audio Source", []() { return new AudioSource(); }},
+    class ComponentFactory {
+    public:
+        static Unique<IComponent> CreateComponent(const str& name) {
+            if (name == "Transform") {
+                return std::make_unique<Transform>();
+            } else if (name == "Behavior") {
+                return std::make_unique<Behavior>();
+            } else if (name == "Sprite Renderer") {
+                return std::make_unique<SpriteRenderer>();
+            } else if (name == "Rigidbody") {
+                return std::make_unique<Rigidbody>();
+            } else if (name == "Box Collider") {
+                return std::make_unique<BoxCollider>();
+            } else if (name == "Circle Collider") {
+                return std::make_unique<CircleCollider>();
+            } else if (name == "Polygon Collider") {
+                return std::make_unique<PolygonCollider>();
+            } else if (name == "Camera") {
+                return std::make_unique<Camera>();
+            } else if (name == "Audio Source") {
+                return std::make_unique<AudioSource>();
+            }
+
+            return nullptr;
+        }
     };
 
     class GameObject {
     public:
         bool Active = true;
-        Dictionary<str, IComponent*> Components;
+        Dictionary<str, Unique<IComponent>> Components;
 
-        GameObject() : Components({{}}) {}
+        GameObject() = default;
 
-        void AddComponent(const str& name) {
-            const auto componentFactory = ComponentFactory.find(name);
-            if (componentFactory == ComponentFactory.end()) {
-                throw std::runtime_error("Component not found");
-            }
-            const auto constructor = componentFactory->second;
-            const auto component   = constructor();
-            Components.insert_or_assign(name, component);
+        Unique<IComponent>& AddComponent(const str& name) {
+            Components.insert_or_assign(name, ComponentFactory::CreateComponent(name));
+            return Components.at(name);
         }
 
         void RemoveComponent(const str& name) {
-            const auto it  = Components.find(name);
-            const auto ptr = it->second;
-            // All components **SHOULD** get cleaned up here.
-            // I still need to implement memory tracking so the dev can
-            // monitor memory usage in the editor and check for leaks.
-            delete ptr;
+            const auto it = Components.find(name);
+            it->second.reset();
             if (it != Components.end()) { Components.erase(it); }
+        }
+
+        template<typename T>
+        T* GetComponent(const str& name) {
+            const auto it = Components.find(name);
+            if (it == Components.end()) { return nullptr; }
+            return it->second->As<T>();
         }
 
         Vector<str> GetComponentNames() {
@@ -171,7 +184,7 @@ namespace Xen {
 
         void Destroy() {
             for (auto it = Components.begin(); it != Components.end(); ++it) {
-                delete it->second;
+                it->second.reset();
             }
             Components.clear();
         }
@@ -205,23 +218,48 @@ namespace Xen {
 
                 gameObject.Active = goActive;
 
-                pugi::xml_node transformNode = go.child("Transform");
+                pugi::xml_node transformNode       = go.child("Transform");
+                pugi::xml_node behaviorNode        = go.child("Behavior");
+                pugi::xml_node spriteRendererNode  = go.child("SpriteRenderer");
+                pugi::xml_node rigidbodyNode       = go.child("Rigidbody");
+                pugi::xml_node boxColliderNode     = go.child("BoxCollider");
+                pugi::xml_node circleColliderNode  = go.child("CircleCollider");
+                pugi::xml_node polygonColliderNode = go.child("PolygonCollider");
+                pugi::xml_node cameraNode          = go.child("Camera");
+                pugi::xml_node audioSourceNode     = go.child("AudioSource");
+
                 if (transformNode) {
-                    // Create transform component
+                    const auto& component = gameObject.AddComponent("Transform");
+                    const auto transform  = component->As<Transform>();
+                    auto xVal             = transformNode.child("Position").attribute("x").value();
+                    auto yVal             = transformNode.child("Position").attribute("y").value();
+                    auto xRotVal          = transformNode.child("Rotation").attribute("x").value();
+                    auto yRotVal          = transformNode.child("Rotation").attribute("y").value();
+                    auto xScaleVal        = transformNode.child("Scale").attribute("x").value();
+                    auto yScaleVal        = transformNode.child("Scale").attribute("y").value();
                     char* end;
-                    const auto x = strtod(transformNode.attribute("x").value(), &end);
-                    const auto y = strtod(transformNode.attribute("y").value(), &end);
-                    gameObject.Components["Transform"] = new Transform((f32)x, (f32)y);
+                    auto x               = (f32)strtod(xVal, &end);
+                    auto y               = (f32)strtod(yVal, &end);
+                    auto xRot            = (f32)strtod(xRotVal, &end);
+                    auto yRot            = (f32)strtod(yRotVal, &end);
+                    auto xScale          = (f32)strtod(xScaleVal, &end);
+                    auto yScale          = (f32)strtod(yScaleVal, &end);
+                    transform->X         = x;
+                    transform->Y         = y;
+                    transform->RotationX = xRot;
+                    transform->RotationY = yRot;
+                    transform->ScaleX    = xScale;
+                    transform->ScaleY    = yScale;
                 }
 
-                pugi::xml_node behaviorNode = go.child("Behavior");
                 if (behaviorNode) {
-                    gameObject.Components["Behavior"] =
-                      new Behavior(behaviorNode.attribute("script").value());
+                    const auto& component = gameObject.AddComponent("Behavior");
+                    const auto behavior   = component->As<Behavior>();
+                    behavior->Script      = behaviorNode.attribute("script").value();
                 }
 
                 // Add to scene
-                scene.GameObjects[goName] = gameObject;
+                scene.GameObjects.insert_or_assign(goName, std::move(gameObject));
             }
 
             return scene;
@@ -234,28 +272,67 @@ namespace Xen {
             auto sceneName           = sceneRoot.append_attribute("name");
             sceneName.set_value(Name.c_str());
 
-            for (auto goIter = GameObjects.begin(); goIter != GameObjects.end(); ++goIter) {
-                auto [goName, go] = *goIter;
-                auto goRoot       = sceneRoot.append_child("GameObject");
-                auto nameAttr     = goRoot.append_attribute("name");
+            for (const auto& [goName, go] : GameObjects) {
+                auto goRoot   = sceneRoot.append_child("GameObject");
+                auto nameAttr = goRoot.append_attribute("name");
                 nameAttr.set_value(goName.c_str());
                 auto activeAttr = goRoot.append_attribute("active");
                 activeAttr.set_value(go.Active);
 
-                auto components = go.Components;
+                auto& components = go.Components;
                 for (auto compIter = components.begin(); compIter != components.end(); ++compIter) {
-                    if (compIter->first == "Transform") {
-                        auto transformRoot = goRoot.append_child("Transform");
-                        auto xAttr         = transformRoot.append_attribute("x");
-                        xAttr.set_value(((Transform*)compIter->second)->X);
-                        auto yAttr = transformRoot.append_attribute("y");
-                        yAttr.set_value(((Transform*)compIter->second)->Y);
-                    }
+                    const auto& [name, component] = *compIter;
 
-                    if (compIter->first == "Behavior") {
-                        auto behaveRoot = goRoot.append_child("Behavior");
-                        auto scriptAttr = behaveRoot.append_attribute("script");
-                        scriptAttr.set_value(compIter->second->As<Behavior>()->Script.c_str());
+                    if (name == "Transform") {
+                        auto transform     = component->As<Transform>();
+                        auto transformRoot = goRoot.append_child("Transform");
+                        auto positionNode  = transformRoot.append_child("Position");
+                        auto rotationNode  = transformRoot.append_child("Rotation");
+                        auto scaleNode     = transformRoot.append_child("Scale");
+                        {  // Position
+                            auto xAttr = positionNode.append_attribute("x");
+                            auto yAttr = positionNode.append_attribute("y");
+                            xAttr.set_value(transform->X);
+                            yAttr.set_value(transform->Y);
+                        }
+                        {  // Rotation
+                            auto xAttr = rotationNode.append_attribute("x");
+                            auto yAttr = rotationNode.append_attribute("y");
+                            xAttr.set_value(transform->RotationX);
+                            yAttr.set_value(transform->RotationY);
+                        }
+                        {  // Scale
+                            auto xAttr = scaleNode.append_attribute("x");
+                            auto yAttr = scaleNode.append_attribute("y");
+                            xAttr.set_value(transform->ScaleX);
+                            yAttr.set_value(transform->ScaleY);
+                        }
+                    } else if (name == "Behavior") {
+                        auto behavior     = component->As<Behavior>();
+                        auto behaviorRoot = goRoot.append_child("Behavior");
+                        auto scriptNode   = behaviorRoot.append_child("Script");
+                        scriptNode.set_value(behavior->Script.c_str());
+                    } else if (name == "Sprite Renderer") {
+                        auto spriteRenderer     = component->As<SpriteRenderer>();
+                        auto spriteRendererRoot = goRoot.append_child("SpriteRenderer");
+                    } else if (name == "Rigidbody") {
+                        auto rigidbody     = component->As<Rigidbody>();
+                        auto rigidbodyRoot = goRoot.append_child("Rigidbody");
+                    } else if (name == "Box Collider") {
+                        auto boxCollider     = component->As<BoxCollider>();
+                        auto boxColliderRoot = goRoot.append_child("BoxCollider");
+                    } else if (name == "Circle Collider") {
+                        auto circleCollider     = component->As<CircleCollider>();
+                        auto circleColliderRoot = goRoot.append_child("CircleCollider");
+                    } else if (name == "Polygon Collider") {
+                        auto polygonCollider     = component->As<PolygonCollider>();
+                        auto polygonColliderRoot = goRoot.append_child("PolygonCollider");
+                    } else if (name == "Camera") {
+                        auto camera     = component->As<Camera>();
+                        auto cameraRoot = goRoot.append_child("Camera");
+                    } else if (name == "Audio Source") {
+                        auto audioSource     = component->As<AudioSource>();
+                        auto audioSourceRoot = goRoot.append_child("AudioSource");
                     }
                 }
             }
@@ -264,9 +341,11 @@ namespace Xen {
         }
 
         void Awake(sol::state& scriptEngine) {
-            for (auto go : GameObjects | std::views::values) {
-                if (go.Components["Behavior"] != nullptr) {
-                    const auto behavior = go.Components["Behavior"]->As<Behavior>();
+            for (auto& go : GameObjects | std::views::values) {
+                if (auto compIter = go.Components.find("Behavior");
+                    compIter != go.Components.end()) {
+                    const auto& [name, component] = *compIter;
+                    const auto behavior           = component->As<Behavior>();
                     scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
                     scriptEngine["onAwake"](go);
                 }
@@ -274,26 +353,30 @@ namespace Xen {
         }
 
         void Update(sol::state& scriptEngine, f32 dT) {
-            for (auto go : GameObjects | std::views::values) {
-                if (go.Components["Behavior"] != nullptr) {
-                    const auto behavior = go.Components["Behavior"]->As<Behavior>();
+            for (auto& go : GameObjects | std::views::values) {
+                if (auto compIter = go.Components.find("Behavior");
+                    compIter != go.Components.end()) {
+                    const auto& [name, component] = *compIter;
+                    const auto behavior           = component->As<Behavior>();
                     scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
                     scriptEngine["onUpdate"](go, dT);
                 }
             }
         }
 
-        void Draw(sol::state& scriptEngine) {
-            for (auto go : GameObjects | std::views::values) {
-                if (go.Components["Sprite Renderer"] != nullptr) {
-                    const auto renderer = go.Components["Sprite Renderer"]->As<SpriteRenderer>();
-                    renderer->Draw();
+        void Draw() {
+            for (auto& go : GameObjects | std::views::values) {
+                if (auto compIter = go.Components.find("Sprite Renderer");
+                    compIter != go.Components.end()) {
+                    const auto& [name, component] = *compIter;
+                    const auto spriteRenderer     = component->As<SpriteRenderer>();
+                    spriteRenderer->Draw();
                 }
             }
         }
 
         void Destroy() {
-            for (auto go : GameObjects | std::views::values) {
+            for (auto& go : GameObjects | std::views::values) {
                 go.Destroy();
             }
         }
@@ -302,10 +385,10 @@ namespace Xen {
     static void RegisterTypes(sol::state& scriptEngine) {
         scriptEngine.new_usertype<Transform>("Transform", "X", &Transform::X, "Y", &Transform::Y);
 
-        scriptEngine.new_usertype<GameObject>("GameObject",
-                                              "Active",
-                                              &GameObject::Active,
-                                              "Components",
-                                              &GameObject::Components);
+        // scriptEngine.new_usertype<GameObject>("GameObject",
+        //                                       "Active",
+        //                                       &GameObject::Active,
+        //                                       "Components",
+        //                                       &GameObject::Components);
     }
 }  // namespace Xen
