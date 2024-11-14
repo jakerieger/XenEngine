@@ -1,9 +1,6 @@
 [submodule "Vendor/Types"]
 	path = Vendor/Types
 	url = git@github.com:jakerieger/Types.git
-[submodule "Tools/XPak"]
-	path = Tools/XPak
-	url = git@github.com:jakerieger/XPak.git
 [submodule "Vendor/imgui"]
 	path = Vendor/imgui
 	url = https://github.com/ocornut/imgui.git
