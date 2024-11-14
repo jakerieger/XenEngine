@@ -10,7 +10,7 @@ target_link_libraries(PicklePuncher PRIVATE
         XenEngine
         lua
         sol2
-        pugixml::shared
+        pugixml::pugixml
         glfw
 )
 

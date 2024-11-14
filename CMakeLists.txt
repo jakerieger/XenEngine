@@ -44,14 +44,14 @@ add_library(XenEngine STATIC
 find_package(sol2 CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
-find_package(GLFW3 CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
 
 target_link_libraries(XenEngine PRIVATE
         lua
         sol2
-        pugixml::shared
+        pugixml::pugixml
         glfw
         glm::glm
 )

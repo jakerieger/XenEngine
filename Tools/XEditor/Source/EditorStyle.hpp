@@ -18,7 +18,7 @@ namespace EditorStyle {
     inline ImVec4 HexToVec4(
       const char* hex,
       const f32 alpha = 1.f) {  // Ensure the string starts with '#' and is the correct length
-        if (std::strlen(hex) != 6) {
+        if (strlen(hex) != 6) {
             throw std::invalid_argument("Hex color should be in the format 'RRGGBB'");
         }
 
