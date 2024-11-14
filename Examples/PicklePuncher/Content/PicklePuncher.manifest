@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<PakManifest>
+    <OutputDir>Build</OutputDir>
+    <Compress>false</Compress>
+    <Content>
+        <Asset name="sprites/idle">
+            <Type>Texture</Type>
+            <Source>sprites/idle.png</Source>
+        </Asset>
+        <Asset name="sprites/blink">
+            <Type>Texture</Type>
+            <Source>sprites/blink.png</Source>
+        </Asset>
+        <Asset name="sprites/punched">
+            <Type>Texture</Type>
+            <Source>sprites/punched.png</Source>
+        </Asset>
+        <Asset name="audio/piano">
+            <Type>Audio</Type>
+            <Source>audio/piano.wav</Source>
+        </Asset>
+    </Content>
+</PakManifest>

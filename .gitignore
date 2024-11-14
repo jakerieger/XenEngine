@@ -7,9 +7,9 @@ out/
 **/obj/
 **/.vs/
 **/packages/
-**/Content/
 **/.mvn/
 **/target/
 **/out/
 **/lib/
 target/
+**/.build_cache
