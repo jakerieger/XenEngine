@@ -3,7 +3,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Examples/Pi
 
 add_executable(PicklePuncher
         ${SHARED}/Panic.hpp
-        PicklePuncher.cpp
+        Source/PicklePuncher.cpp
 )
 
 target_link_libraries(PicklePuncher PRIVATE

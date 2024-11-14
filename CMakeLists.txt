@@ -36,7 +36,6 @@ include_directories(
 
 add_library(XenEngine STATIC
         ${SHARED}/Panic.hpp
-        ${INC}/Platform.hpp
         ${INC}/XenEngine.hpp
         ${SRC}/XenEngine.cpp
 )
@@ -61,3 +60,4 @@ add_subdirectory(Tools/XEditor)
 add_subdirectory(Tools/XPak)
 
 add_subdirectory(Examples/PicklePuncher)
+add_subdirectory(Examples/Pong)
