@@ -39,7 +39,7 @@ namespace EditorStyle {
         return color;
     }
 
-    static void LoadAndApplyStyle(const char* filename) {
+    static void LoadAndApplyStyle(const char* filename, bool loadFont = true) {
         // Parse XML file
         pugi::xml_document doc;
         const Path themeFile   = Path("Themes") / filename;
@@ -51,9 +51,11 @@ namespace EditorStyle {
         const auto fontFile  = themeRoot.child_value("Font");
 
         // Load font
-        const ImGuiIO& io   = ImGui::GetIO();
-        const auto fontPath = Path("Themes/Fonts") / fontFile;
-        io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16);
+        if (loadFont) {
+            const ImGuiIO& io   = ImGui::GetIO();
+            const auto fontPath = Path("Themes/Fonts") / fontFile;
+            io.Fonts->AddFontFromFileTTF(fontPath.string().c_str(), 16);
+        }
 
         const auto borderRadiusValue = themeRoot.child_value("BorderRadius");
         const auto borderWidthValue  = themeRoot.child_value("BorderWidth");

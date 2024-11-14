@@ -16,10 +16,7 @@
 
 #define EXIT_CODE_QUIT 69
 
-struct ComponentOption {
-    str Name;
-    bool Available;
-};
+static const auto DefaultTheme = "XenDark.xml";
 
 class EditorUI {
 public:
@@ -37,7 +34,7 @@ public:
           ImGuiConfigFlags_ViewportsEnable;  // Enable Multi-Viewport / Platform Windows
 
         // Load default theme
-        EditorStyle::LoadAndApplyStyle("XenDark.xml");
+        EditorStyle::LoadAndApplyStyle(DefaultTheme);
 
         ImGui_ImplGlfw_InitForOpenGL(*window, true);
         ImGui_ImplOpenGL3_Init("#version 130");
@@ -96,6 +93,14 @@ public:
         Messages();
     }
 
+    void DeferredCallbacks() {
+        if (deferredCallbacks.empty()) return;
+        for (const auto& cb : deferredCallbacks) {
+            cb();
+        }
+        deferredCallbacks.clear();
+    }
+
 private:
     GLFWwindow** editorWindow;
     Logger logger;
@@ -117,6 +122,11 @@ private:
                               "Camera",
                               "Audio Source"};
     str selectedComponent;
+    const char* themes[2]  = {"XenDark.xml", "Moonlight.xml"};
+    int selectedTheme      = 0;
+    bool preferencesDialog = false;
+    bool aboutDialog       = false;
+    Vector<std::function<void()>> deferredCallbacks;
 
 private:
     void MainMenu() {
@@ -154,11 +164,27 @@ private:
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Edit")) { ImGui::EndMenu(); }
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("Preferences")) { preferencesDialog = true; }
 
-            if (ImGui::BeginMenu("View")) { ImGui::EndMenu(); }
+                ImGui::EndMenu();
+            }
 
-            if (ImGui::BeginMenu("Help")) { ImGui::EndMenu(); }
+            if (ImGui::BeginMenu("Tools")) {
+                if (ImGui::MenuItem("Pack Assets...")) {
+                    deferredCallbacks.emplace_back([&]() { std::cout << "PackAssets()" << '\n'; });
+                }
+
+                ImGui::EndMenu();
+            }
+
+            // if (ImGui::BeginMenu("View")) { ImGui::EndMenu(); }
+
+            if (ImGui::BeginMenu("Help")) {
+                if (ImGui::MenuItem("About")) { aboutDialog = true; }
+
+                ImGui::EndMenu();
+            }
 
             ImGui::EndMainMenuBar();
         }
@@ -186,6 +212,43 @@ private:
             }
 
             if (!ImGui::IsPopupOpen("New Scene")) { newSceneDialog = false; }
+        }
+
+        if (preferencesDialog) {
+            ImGui::OpenPopup("Preferences");
+            ImGui::SetNextWindowSize(ImVec2(600, 400));
+            if (ImGui::BeginPopupModal("Preferences", nullptr)) {
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("Theme: ");
+                ImGui::SameLine(80.f);
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                if (ImGui::Combo("##Themes", &selectedTheme, themes, IM_ARRAYSIZE(themes))) {
+                    deferredCallbacks.emplace_back(
+                      [&]() { EditorStyle::LoadAndApplyStyle(themes[selectedTheme], false); });
+                }
+
+                if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+                ImGui::EndPopup();
+            }
+
+            if (!ImGui::IsPopupOpen("Preferences")) { preferencesDialog = false; }
+        }
+
+        if (aboutDialog) {
+            ImGui::OpenPopup("About");
+            if (ImGui::BeginPopupModal("About", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
+                ImGui::Text("XEditor - Copyright © 2024, Jake Rieger");
+                ImGui::Text("Version: 0.0.1-dev");
+                if (ImGui::Button("OK", ImVec2(ImGui::GetColumnWidth(), 0))) {
+                    ImGui::CloseCurrentPopup();
+                }
+
+                ImGui::EndPopup();
+            }
+
+            if (!ImGui::IsPopupOpen("About")) { aboutDialog = false; }
         }
     }
 
@@ -240,10 +303,12 @@ private:
 
         if (!selectedGameObject.empty()) {
             ImGui::Text("Name: %s", selectedGameObject.c_str());
-            auto gameObject  = activeScene.GameObjects.find(selectedGameObject);
-            auto& [name, go] = *gameObject;
-            for (auto& [name, component] : go.Components) {
-                if (name == "Transform") {
+            auto gameObject    = activeScene.GameObjects.find(selectedGameObject);
+            auto& [goName, go] = *gameObject;
+
+            Vector<str> componentsToRemove;
+            for (auto& [compName, component] : go.Components) {
+                if (compName == "Transform") {
                     if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Transform",
                                           ImVec2(0, 0),
@@ -273,105 +338,109 @@ private:
                     }
                 }
 
-                if (name == "Behavior") {
+                if (compName == "Behavior") {
                     if (ImGui::CollapsingHeader("Behavior", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Behavior",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         ImGui::Text("Script: %s", component->As<Xen::Behavior>()->Script.c_str());
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Behavior");
+                            componentsToRemove.emplace_back("Behavior");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Sprite Renderer") {
+                if (compName == "Sprite Renderer") {
                     if (ImGui::CollapsingHeader("Sprite Renderer",
                                                 ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Sprite Renderer",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Sprite Renderer");
+                            componentsToRemove.emplace_back("Sprite Renderer");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Rigidbody") {
+                if (compName == "Rigidbody") {
                     if (ImGui::CollapsingHeader("Rigidbody", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Rigidbody",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Rigidbody");
+                            componentsToRemove.emplace_back("Rigidbody");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Box Collider") {
+                if (compName == "Box Collider") {
                     if (ImGui::CollapsingHeader("Box Collider", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Box Collider",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Box Collider");
+                            componentsToRemove.emplace_back("Box Collider");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Circle Collider") {
+                if (compName == "Circle Collider") {
                     if (ImGui::CollapsingHeader("Circle Collider",
                                                 ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Circle Collider",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Circle Collider");
+                            componentsToRemove.emplace_back("Circle Collider");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Polygon Collider") {
+                if (compName == "Polygon Collider") {
                     if (ImGui::CollapsingHeader("Polygon Collider",
                                                 ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Polygon Collider",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Polygon Collider");
+                            componentsToRemove.emplace_back("Polygon Collider");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Camera") {
+                if (compName == "Camera") {
                     if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Camera",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Camera");
+                            componentsToRemove.emplace_back("Camera");
                         }
                         ImGui::EndChild();
                     }
                 }
 
-                if (name == "Audio Source") {
+                if (compName == "Audio Source") {
                     if (ImGui::CollapsingHeader("Audio Source", ImGuiTreeNodeFlags_DefaultOpen)) {
                         ImGui::BeginChild("Audio Source",
                                           ImVec2(0, 0),
                                           ImGuiChildFlags_Borders | ImGuiChildFlags_AutoResizeY);
                         if (ImGui::Button("Remove", ImVec2(ImGui::GetContentRegionAvail().x, 24))) {
-                            go.RemoveComponent("Audio Source");
+                            componentsToRemove.emplace_back("Audio Source");
                         }
                         ImGui::EndChild();
                     }
                 }
+            }
+
+            for (const auto& comp : componentsToRemove) {
+                go.RemoveComponent(comp);
             }
 
             if (ImGui::Button("+", ImVec2(ImGui::GetContentRegionAvail().x, 32))) {

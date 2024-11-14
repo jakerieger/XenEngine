@@ -58,6 +58,7 @@ public:
             EditorUI::BeginUI();
             ui->Draw();
             EditorUI::EndUI();
+            ui->DeferredCallbacks();  // Actions that need to occur outside the ImGui frame
 
             glfwSwapBuffers(window);
         }

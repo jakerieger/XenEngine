@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Theme name="Moonlight">
+    <WindowBackground>222436</WindowBackground>
+    <ChildBackground>24283b</ChildBackground>
+    <FrameBackground>24283b</FrameBackground>
+    <SecondaryBackground>444a73</SecondaryBackground>
+    <HeaderBackground>16161e</HeaderBackground>
+    <TextHighlight>fffffa</TextHighlight>
+    <TextPrimary>c7d2d9</TextPrimary>
+    <TextSecondary>93a0cb</TextSecondary>
+    <TextDisabled>828bb8</TextDisabled>
+    <Border>444a73</Border>
+    <Error>FF0000</Error>
+    <Warning>FFFF00</Warning>
+    <Success>00FF00</Success>
+    <Link>0000FF</Link>
+    <Scrollbar>465a88</Scrollbar>
+    <Primary>4b6295</Primary>
+    <Secondary>2f334d</Secondary>
+    <BorderRadius>4.0</BorderRadius>
+    <BorderWidth>1.0</BorderWidth>
+    <Font>Inter-Regular.ttf</Font>
+</Theme>

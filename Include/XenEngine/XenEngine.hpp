@@ -163,8 +163,10 @@ namespace Xen {
 
         void RemoveComponent(const str& name) {
             const auto it = Components.find(name);
-            it->second.reset();
-            if (it != Components.end()) { Components.erase(it); }
+            if (it != Components.end()) {
+                // it->second.reset();
+                Components.erase(it);
+            }
         }
 
         template<typename T>
@@ -258,7 +260,47 @@ namespace Xen {
                     behavior->Script      = behaviorNode.child_value("Script");
                 }
 
-                // TODO: Add the rest of the nodes
+                if (spriteRendererNode) {
+                    const auto& component     = gameObject.AddComponent("Sprite Renderer");
+                    const auto spriteRenderer = component->As<SpriteRenderer>();
+                    // Do stuff
+                }
+
+                if (rigidbodyNode) {
+                    const auto& component = gameObject.AddComponent("Rigidbody");
+                    const auto rigidbody  = component->As<Rigidbody>();
+                    // Do stuff
+                }
+
+                if (boxColliderNode) {
+                    const auto& component  = gameObject.AddComponent("Box Collider");
+                    const auto boxCollider = component->As<BoxCollider>();
+                    // Do stuff
+                }
+
+                if (circleColliderNode) {
+                    const auto& component     = gameObject.AddComponent("Circle Collider");
+                    const auto circleCollider = component->As<CircleCollider>();
+                    // Do stuff
+                }
+
+                if (polygonColliderNode) {
+                    const auto& component      = gameObject.AddComponent("Polygon Collider");
+                    const auto polygonCollider = component->As<PolygonCollider>();
+                    // Do stuff
+                }
+
+                if (cameraNode) {
+                    const auto& component = gameObject.AddComponent("Camera");
+                    const auto camera     = component->As<Camera>();
+                    // Do stuff
+                }
+
+                if (audioSourceNode) {
+                    const auto& component  = gameObject.AddComponent("Audio Source");
+                    const auto audioSource = component->As<AudioSource>();
+                    // Do stuff
+                }
 
                 // Add to scene
                 scene.GameObjects.insert_or_assign(goName, std::move(gameObject));
