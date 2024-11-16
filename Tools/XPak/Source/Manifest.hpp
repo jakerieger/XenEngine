@@ -94,10 +94,11 @@ public:
         Build();
     }
 
-    void Clean() const {
+    void Clean() {
         const auto _         = CreateOutputDir();
         const auto cacheFile = RootDir / ".build_cache";
         if (exists(cacheFile)) { remove(cacheFile); }
+        buildCache.Assets.clear();
     }
 
 private:

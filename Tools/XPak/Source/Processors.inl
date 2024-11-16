@@ -24,7 +24,27 @@ public:
     }
 
     static Vector<u8> ProcessAudio(const Path& filename) {
-        return ReadFile(filename);
+        AudioFile<f32> audio;
+        if (!audio.load(filename.string())) {
+            std::cerr << "Failed to load audio file: " << filename.string() << std::endl;
+            return {};
+        }
+        if (audio.getNumChannels() != 2) {
+            std::cerr << "Audio file does not have two channels (stereo)" << std::endl;
+            return {};
+        }
+
+        size_t numSamples = audio.getNumSamplesPerChannel();
+        Vector<f32> interleavedData(numSamples * 2);
+        for (auto i = 0; i < numSamples; ++i) {
+            interleavedData[i * 2]     = audio.samples[0][i];  // Left channel
+            interleavedData[i * 2 + 1] = audio.samples[1][i];  // Right channel
+        }
+
+        Vector<u8> result(interleavedData.size() * 4);  // Size of float in bytes
+        memcpy(result.data(), interleavedData.data(), interleavedData.size() * 4);
+
+        return result;
     }
 
     static Vector<u8> ProcessData(const Path& filename) {
