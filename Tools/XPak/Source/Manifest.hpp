@@ -9,19 +9,34 @@
 #include "BuildCache.hpp"
 #include "Processors.inl"
 
+#include <ranges>
+
 class Manifest {
 public:
-    Path Name;
     Path RootDir;
     Path OutputDir;
     bool Compress;
     Vector<Asset> Assets;
 
-    explicit Manifest(const str& filename) {
+    explicit Manifest(const str& filename) : Compress(false) {
+        Assets.clear();
         pugi::xml_document doc;
         const pugi::xml_parse_result result = doc.load_file(filename.c_str());
         if (!result) { Panic("Failed to load manifest file"); }
-        RootDir = Path(filename).parent_path();
+        RootDir                     = canonical(Path(filename)).parent_path();
+        const auto& rootNode        = doc.child("PakManifest");
+        OutputDir                   = Path(rootNode.child_value("OutputDir"));
+        Compress                    = rootNode.child_value("Compress") == "true";
+        const auto& contentNode     = rootNode.child("Content");
+        const auto& contentChildren = contentNode.children("Asset");
+        const i64 assetCount        = std::distance(contentChildren.begin(), contentChildren.end());
+        Assets.reserve(assetCount);
+        for (const auto& asset : contentChildren) {
+            const auto& assetName   = asset.attribute("name").as_string();
+            const auto& assetType   = asset.child_value("Type");
+            const auto& assetSource = asset.child_value("Source");
+            Assets.emplace_back(assetName, assetType, assetSource);
+        }
     }
 
     void Build() {
@@ -50,26 +65,44 @@ public:
         }
 
         auto assetId = 1;
-        for (const auto& asset : assetsToBuild) {
+        for (const auto& asset : assetsToBuild | std::views::keys) {
             std::cout << "  | [" << assetId << "/" << assetsToBuild.size()
-                      << "] Building asset: " << asset.first->Name << '\n';
-            BuildAsset(outputDir, *asset.first, asset.second);
+                      << "] Building asset: " << asset->Name << '\n';
+            BuildAsset(outputDir, *asset, Path(asset->Source));
             ++assetId;
         }
 
         buildCache.SaveToFile(RootDir.string());
     }
 
-    void Rebuild() {}
+    void Rebuild() {
+        Clean();
+        Build();
+    }
 
-    void Clean() {}
+    void Clean() const {
+        const auto _         = CreateOutputDir();
+        const auto cacheFile = RootDir / ".build_cache";
+        if (exists(cacheFile)) { remove(cacheFile); }
+    }
 
 private:
     Path manifestPath;
     BuildCache buildCache;
 
     void CleanContentDirectory() const {
-        if (FileSystem::exists(RootDir)) { FileSystem::remove_all(RootDir); }
+        if (FileSystem::exists(OutputDir)) {
+            str response;
+            std::cout
+              << "XPak is about to delete the following directory and all its contents:\n  - "
+              << canonical((RootDir / OutputDir)).string() << "\nContinue? (Y/n): ";
+            std::cin >> response;
+            if (response == "n") {
+                std::cout << "Bummer, dude." << std::endl;
+                std::exit(69);
+            }
+            FileSystem::remove_all(OutputDir);
+        }
     }
 
     [[nodiscard]] Path CreateOutputDir() const {
@@ -81,9 +114,9 @@ private:
 
     static void BuildAsset(const Path& outputDir, const Asset& asset, const Path& sourceFile) {
         auto outputFile = outputDir / sourceFile;
-        outputFile += ".xpak";
+        outputFile.replace_extension(".xpak");
         if (FileSystem::exists(outputFile)) { FileSystem::remove(outputFile); }
-        FileSystem::create_directories(outputDir.parent_path());
+        FileSystem::create_directories(outputFile.parent_path());
 
         Vector<u8> data;
         switch (asset.Type) {

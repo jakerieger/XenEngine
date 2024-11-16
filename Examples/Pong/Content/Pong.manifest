@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PakManifest>
     <OutputDir>Build</OutputDir>
     <Compress>false</Compress>
     <Content>
-        <Asset name="sprites/player">
+        <Asset name="sprites/ball">
             <Type>Texture</Type>
-            <Source>sprites/player.png</Source>
+            <Source>sprites/ball.png</Source>
         </Asset>
         <Asset name="sprites/paddle">
             <Type>Texture</Type>

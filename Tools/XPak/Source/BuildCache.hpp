@@ -8,8 +8,8 @@
 
 #include <Panic.hpp>
 #include <pugixml.hpp>
-#include <openssl/sha.h>
 #include <fstream>
+#include <sha256.h>
 
 #define INC_DICTIONARY
 #define INC_VECTOR
@@ -60,18 +60,16 @@ struct BuildCache {
         std::ifstream file(filename, std::ios::binary);
         if (!file) { Panic("Failed to open file"); }
 
-        SHA256_CTX sha256;
-        SHA256_Init(&sha256);
+        SHA256 sha256;
         Vector<char> buffer(4096);
-
         while (file.read(buffer.data(), CAST<std::streamsize>(buffer.size())) ||
                file.gcount() > 0) {
             // Only update SHA256 if there's data read
-            SHA256_Update(&sha256, buffer.data(), file.gcount());
+            sha256.add(buffer.data(), file.gcount());
         }
 
-        u8 hash[SHA256_DIGEST_LENGTH];
-        SHA256_Final(hash, &sha256);
+        u8 hash[32];
+        sha256.getHash(hash);
 
         std::ostringstream result;
         result << std::hex << std::setfill('0');

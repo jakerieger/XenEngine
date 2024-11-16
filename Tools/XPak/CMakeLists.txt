@@ -6,6 +6,8 @@ include_directories(
 )
 
 add_executable(XPak
+        ${VEND}/sha256.h
+        ${VEND}/sha256.cpp
         Source/Asset.hpp
         Source/Manifest.hpp
         Source/BuildCache.hpp
@@ -13,13 +15,10 @@ add_executable(XPak
         Source/main.cpp
 )
 
-find_package(OpenSSL REQUIRED)
 find_package(CLI11 CONFIG REQUIRED)
 
 target_link_libraries(XPak PRIVATE
         XenEngine
         pugixml::pugixml
         CLI11::CLI11
-        OpenSSL::SSL
-        OpenSSL::Crypto
 )
