@@ -91,18 +91,7 @@ private:
     BuildCache buildCache;
 
     void CleanContentDirectory() const {
-        if (FileSystem::exists(OutputDir)) {
-            str response;
-            std::cout
-              << "XPak is about to delete the following directory and all its contents:\n  - "
-              << canonical((RootDir / OutputDir)).string() << "\nContinue? (Y/n): ";
-            std::cin >> response;
-            if (response == "n") {
-                std::cout << "Bummer, dude." << std::endl;
-                std::exit(69);
-            }
-            FileSystem::remove_all(OutputDir);
-        }
+        if (FileSystem::exists(OutputDir)) { FileSystem::remove_all(OutputDir); }
     }
 
     [[nodiscard]] Path CreateOutputDir() const {
