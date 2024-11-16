@@ -39,6 +39,10 @@ public:
             const auto& assetSource = asset.child_value("Source");
             Assets.emplace_back(assetName, assetType, assetSource);
         }
+
+        // Load build cache if it exists
+        const auto cacheFile = RootDir / ".build_cache";
+        if (exists(cacheFile)) { buildCache = BuildCache(cacheFile.string().c_str()); }
     }
 
     void Build() {
@@ -62,7 +66,7 @@ public:
             if (rebuild) {
                 assetsToBuild.emplace_back(&asset, sourceFile);
             } else {
-                std::cout << "Skipping asset: " << asset.Name << '\n';
+                std::cout << "  | Skipping unchanged asset: " << asset.Name << '\n';
             }
         }
 

@@ -32,7 +32,7 @@ struct BuildCache {
         const auto cacheRoot = doc.child("BuildCache");
         for (auto& asset : cacheRoot.children("Asset")) {
             const auto& source   = asset.attribute("source").value();
-            const auto& checksum = asset.value();
+            const auto& checksum = asset.text().as_string();
             this->Assets.insert_or_assign(source, checksum);
         }
     }
@@ -44,7 +44,7 @@ struct BuildCache {
             auto assetNode  = rootNode.append_child("Asset");
             auto sourceAttr = assetNode.append_attribute("source");
             sourceAttr.set_value(source.c_str());
-            assetNode.set_value(checksum.c_str());
+            assetNode.text().set(checksum.c_str());
         }
         const auto outFile = Path(rootDir) / ".build_cache";
         if (!doc.save_file(outFile.string().c_str())) { Panic("Failed to save build cache"); }
