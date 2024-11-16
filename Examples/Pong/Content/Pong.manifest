@@ -11,5 +11,9 @@
             <Type>Texture</Type>
             <Source>sprites/paddle.png</Source>
         </Asset>
+        <Asset name="audio/bg_music">
+            <Type>Audio</Type>
+            <Source>audio/bg_music.wav</Source>
+        </Asset>
     </Content>
 </PakManifest>

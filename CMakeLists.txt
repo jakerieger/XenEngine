@@ -13,6 +13,11 @@ set(SHARED ${CMAKE_CURRENT_SOURCE_DIR}/Shared)
 set(VEND ${CMAKE_CURRENT_SOURCE_DIR}/Vendor)
 set(TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/Tools)
 
+set(STB_SRCS
+        ${VEND}/stb_image.h
+        ${VEND}/stb_image.cpp
+)
+
 set(GLAD_SRCS
         ${VEND}/glad.c
         ${VEND}/glad/glad.h
@@ -40,6 +45,9 @@ add_library(XenEngine STATIC
         ${SRC}/XenEngine.cpp
 )
 
+# VENDOR #
+add_subdirectory(Vendor/OpenGLTK)
+
 find_package(sol2 CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
@@ -53,6 +61,7 @@ target_link_libraries(XenEngine PRIVATE
         pugixml::pugixml
         glfw
         glm::glm
+        OpenGLTK
 )
 
 # TOOLS #

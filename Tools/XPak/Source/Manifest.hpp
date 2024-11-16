@@ -9,7 +9,9 @@
 #include "BuildCache.hpp"
 #include "Processors.inl"
 
+#include <future>
 #include <ranges>
+#include <thread>
 
 class Manifest {
 public:
@@ -64,12 +66,20 @@ public:
             }
         }
 
-        auto assetId = 1;
+        Vector<std::future<void>> futures;
         for (const auto& asset : assetsToBuild | std::views::keys) {
-            std::cout << "  | [" << assetId << "/" << assetsToBuild.size()
-                      << "] Building asset: " << asset->Name << '\n';
-            BuildAsset(outputDir, *asset, Path(asset->Source));
-            ++assetId;
+            futures.emplace_back(std::async(std::launch::async, [&]() {
+                static std::atomic<i32> assetId = 1;
+                const int localId               = assetId.fetch_add(1);
+                std::cout << "  | [" << localId << "/" << assetsToBuild.size()
+                          << "] Building asset: " << asset->Name << '\n';
+                BuildAsset(outputDir, *asset, Path(asset->Source));
+            }));
+        }
+
+        // Wait for all the tasks to complete
+        for (auto& future : futures) {
+            if (future.valid()) future.get();
         }
 
         buildCache.SaveToFile(RootDir.string());

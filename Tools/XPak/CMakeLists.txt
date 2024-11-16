@@ -6,6 +6,7 @@ include_directories(
 )
 
 add_executable(XPak
+        ${STB_SRCS}
         ${VEND}/sha256.h
         ${VEND}/sha256.cpp
         Source/Asset.hpp

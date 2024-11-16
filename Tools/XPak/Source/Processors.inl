@@ -4,12 +4,23 @@
 
 #pragma once
 
+#include <stb_image.h>
+#include <AudioFile.h>
+
 class Processors {
 public:
     // TODO: Write the actual implementations for these
 
     static Vector<u8> ProcessTexture(const Path& filename) {
-        return ReadFile(filename);
+        int width, height, channels;
+        stbi_set_flip_vertically_on_load(true);  // needed for OpenGL
+        const stbi_uc* data =
+          stbi_load(filename.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+        if (!data) { Panic("Failed to load image"); }
+        Vector<u8> result(width * height * channels);
+        memcpy(result.data(), data, width * height * channels);
+
+        return result;
     }
 
     static Vector<u8> ProcessAudio(const Path& filename) {

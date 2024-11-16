@@ -4,3 +4,6 @@
 [submodule "Vendor/imgui"]
 	path = Vendor/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "Vendor/OpenGLTK"]
+	path = Vendor/OpenGLTK
+	url = https://github.com/jakerieger/OpenGLTK.git
