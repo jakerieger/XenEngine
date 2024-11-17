@@ -201,7 +201,7 @@ namespace Xen {
             GameObjects.clear();
         }
 
-        static Scene Load(const char* filename) {
+        static Unique<Scene> Load(const char* filename) {
             pugi::xml_document doc;
 
             const pugi::xml_parse_result result = doc.load_file(filename);
@@ -210,7 +210,7 @@ namespace Xen {
             const pugi::xml_node sceneRoot = doc.child("Scene");
             const auto sceneName           = sceneRoot.attribute("name").value();
 
-            Scene scene(sceneName);
+            auto scene = std::make_unique<Scene>(sceneName);
 
             for (auto go : sceneRoot.children("GameObject")) {
                 GameObject gameObject;
@@ -303,10 +303,10 @@ namespace Xen {
                 }
 
                 // Add to scene
-                scene.GameObjects.insert_or_assign(goName, std::move(gameObject));
+                scene->GameObjects.insert_or_assign(goName, std::move(gameObject));
             }
 
-            return scene;
+            return std::move(scene);
         }
 
         /// @brief Saves the scene to a file on disk (*.xscene)

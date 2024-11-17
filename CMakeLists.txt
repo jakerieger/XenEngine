@@ -45,9 +45,6 @@ add_library(XenEngine STATIC
         ${SRC}/XenEngine.cpp
 )
 
-# VENDOR #
-add_subdirectory(Vendor/OpenGLTK)
-
 find_package(sol2 CONFIG REQUIRED)
 find_package(lua CONFIG REQUIRED)
 find_package(pugixml CONFIG REQUIRED)
@@ -61,7 +58,6 @@ target_link_libraries(XenEngine PRIVATE
         pugixml::pugixml
         glfw
         glm::glm
-        OpenGLTK
 )
 
 # TOOLS #

@@ -14,6 +14,8 @@ add_executable(XEditor
         Source/EditorStyle.cpp
         Source/EditorLog.cpp
         Source/EditorLog.h
+        Source/EditorPreferences.cpp
+        Source/EditorPreferences.hpp
 )
 
 target_link_libraries(XEditor PRIVATE

@@ -5,6 +5,7 @@
 #pragma once
 
 #include "EditorLog.h"
+#include "EditorPreferences.hpp"
 #include "EditorStyle.hpp"
 #include "XenEngine.hpp"
 
@@ -16,11 +17,9 @@
 
 #define EXIT_CODE_QUIT 69
 
-static const auto DefaultTheme = "XenDark.xml";
-
 class EditorUI {
 public:
-    explicit EditorUI(GLFWwindow** window) : activeScene("Untitled") {
+    explicit EditorUI(GLFWwindow** window) {
         editorWindow = window;
 
         IMGUI_CHECKVERSION();
@@ -34,7 +33,10 @@ public:
           ImGuiConfigFlags_ViewportsEnable;  // Enable Multi-Viewport / Platform Windows
 
         // Load default theme
-        EditorStyle::LoadAndApplyStyle(DefaultTheme);
+        editorPreferences = std::make_unique<EditorPreferences>();
+        editorPreferences->LoadFromFile("Preferences.xml");
+        EditorStyle::LoadAndApplyStyle(editorPreferences->Theme.c_str());
+        activeScene = std::make_unique<Xen::Scene>("Untitled");  // Empty default scene
 
         ImGui_ImplGlfw_InitForOpenGL(*window, true);
         ImGui_ImplOpenGL3_Init("#version 130");
@@ -70,8 +72,8 @@ public:
 
     void Draw() {
         // Get scene frame
-        if (!activeScene.Name.empty()) {
-            for (const auto& go : activeScene.GameObjects | std::views::values) {
+        if (!activeScene->Name.empty()) {
+            for (const auto& go : activeScene->GameObjects | std::views::values) {
                 if (auto component = go.Components.find("Sprite Renderer");
                     component != go.Components.end()) {
                     const auto& [_, renderer] = *component;
@@ -104,9 +106,9 @@ public:
 private:
     GLFWwindow** editorWindow;
     Logger logger;
-
-    Xen::Scene activeScene;
     str activeSceneFile;
+    Unique<Xen::Scene> activeScene;
+    Unique<EditorPreferences> editorPreferences;
 
     char newSceneName[64]      = {'\0'};
     bool newSceneDialog        = false;
@@ -127,6 +129,7 @@ private:
     bool preferencesDialog = false;
     bool aboutDialog       = false;
     Vector<std::function<void()>> deferredCallbacks;
+    char xpakPath[256] = {'\0'};
 
 private:
     void MainMenu() {
@@ -143,16 +146,16 @@ private:
                       tinyfd_openFileDialog(title, "", 2, patterns, nullptr, 0);
 
                     if (selectedFile) {
-                        activeScene     = std::move(Xen::Scene::Load(selectedFile));
+                        activeScene     = Xen::Scene::Load(selectedFile);
                         activeSceneFile = selectedFile;
                         UpdateWindowTitle();
 
-                        logger.Log("Opened scene: " + activeScene.Name);
+                        logger.Log("Opened scene: " + activeScene->Name);
                     }
                 }
 
                 if (ImGui::MenuItem("Save Scene")) {
-                    if (!activeSceneFile.empty()) { activeScene.Save(activeSceneFile.c_str()); }
+                    if (!activeSceneFile.empty()) { activeScene->Save(activeSceneFile.c_str()); }
                 }
 
                 if (ImGui::MenuItem("Save Scene As...")) { SaveSceneToFile(); }
@@ -199,8 +202,8 @@ private:
 
                 if (ImGui::Button("OK", ImVec2(120, 0))) {
                     if (newSceneName[0] != '\0') {
-                        activeScene     = std::move(Xen::Scene(newSceneName));
                         activeSceneFile = "";
+                        activeScene     = std::make_unique<Xen::Scene>(newSceneName);
                         UpdateWindowTitle();
                         SaveSceneToFile();
                     }
@@ -216,7 +219,7 @@ private:
 
         if (preferencesDialog) {
             ImGui::OpenPopup("Preferences");
-            ImGui::SetNextWindowSize(ImVec2(600, 400));
+            ImGui::SetNextWindowSize(ImVec2(600, 0));
             if (ImGui::BeginPopupModal("Preferences", nullptr)) {
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text("Theme: ");
@@ -226,6 +229,12 @@ private:
                     deferredCallbacks.emplace_back(
                       [&]() { EditorStyle::LoadAndApplyStyle(themes[selectedTheme], false); });
                 }
+
+                ImGui::AlignTextToFramePadding();
+                ImGui::Text("XPak Path: ");
+                ImGui::SameLine(80.f);
+                ImGui::SetNextItemWidth(-FLT_MIN);
+                ImGui::InputText("##XpakPath", xpakPath, IM_ARRAYSIZE(xpakPath));
 
                 if (ImGui::Button("OK", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
                 ImGui::SameLine();
@@ -258,13 +267,13 @@ private:
         ImGui::Begin("Hierarchy");
 
         ImGui::AlignTextToFramePadding();
-        ImGui::Text(activeScene.Name.c_str());
+        ImGui::Text(activeScene->Name.c_str());
         ImGui::SameLine(ImGui::GetColumnWidth() - 24);
         if (ImGui::Button("+", ImVec2(32, 32))) { ImGui::OpenPopup("Add new GameObject"); }
 
         // GameObject tree
         ImGui::BeginChild("GameObjects", ImVec2(0, ImGui::GetContentRegionAvail().y), true);
-        for (const auto& name : activeScene.GameObjects | std::views::keys) {
+        for (const auto& name : activeScene->GameObjects | std::views::keys) {
             if (ImGui::Selectable(name.c_str(), selectedGameObject == name)) {
                 selectedGameObject = name;
             }
@@ -279,11 +288,11 @@ private:
             ImGui::InputText("##GoName", newGameObjectName, IM_ARRAYSIZE(newSceneName));
 
             if (ImGui::Button("OK", ImVec2(120, 0))) {
-                if (!activeScene.Name.empty()) {
-                    activeScene.GameObjects.insert_or_assign(newGameObjectName,
-                                                             std::move(Xen::GameObject()));
-                    auto go = activeScene.GameObjects.find(newGameObjectName);
-                    if (go == activeScene.GameObjects.end()) { return; }
+                if (!activeScene->Name.empty()) {
+                    activeScene->GameObjects.insert_or_assign(newGameObjectName,
+                                                              std::move(Xen::GameObject()));
+                    auto go = activeScene->GameObjects.find(newGameObjectName);
+                    if (go == activeScene->GameObjects.end()) { return; }
                     auto& [name, gameObject] = *go;
                     gameObject.AddComponent("Transform");
                 }
@@ -303,7 +312,7 @@ private:
 
         if (!selectedGameObject.empty()) {
             ImGui::Text("Name: %s", selectedGameObject.c_str());
-            auto gameObject    = activeScene.GameObjects.find(selectedGameObject);
+            auto gameObject    = activeScene->GameObjects.find(selectedGameObject);
             auto& [goName, go] = *gameObject;
 
             Vector<str> componentsToRemove;
@@ -512,18 +521,18 @@ private:
     void UpdateWindowTitle() const {
         std::stringstream ss;
         ss << "XEditor — ";
-        ss << activeScene.Name;
+        ss << activeScene->Name;
         glfwSetWindowTitle(*editorWindow, ss.str().c_str());
     }
 
     void SaveSceneToFile() {
         const auto title            = "Save Scene";
-        const char* defaultFileName = activeScene.Name.c_str();
+        const char* defaultFileName = activeScene->Name.c_str();
         const char* patterns[]      = {"*.xscene", "*.xml"};
         const char* saveFile = tinyfd_saveFileDialog(title, defaultFileName, 2, patterns, nullptr);
 
         if (saveFile) {
-            activeScene.Save(saveFile);
+            activeScene->Save(saveFile);
             activeSceneFile = saveFile;
         }
     }
