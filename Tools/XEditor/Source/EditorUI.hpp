@@ -59,7 +59,7 @@ public:
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows
-        // (Platform functions may change the current OpenGL context, so we save/restore it to
+        // Platform functions may change the current OpenGL context, so we save/restore it to
         // make it easier to paste this code elsewhere.
         const ImGuiIO& io = ImGui::GetIO();
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {

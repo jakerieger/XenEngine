@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <PakManifest>
     <OutputDir>Build</OutputDir>
-    <Compress>false</Compress>
+    <Compress>true</Compress>
     <Content>
         <Asset name="sprites/ball">
             <Type>Texture</Type>

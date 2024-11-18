@@ -14,6 +14,7 @@ add_executable(XPak
         Source/BuildCache.hpp
         Source/Processors.inl
         Source/main.cpp
+        Source/Compression.h
 )
 
 find_package(CLI11 CONFIG REQUIRED)

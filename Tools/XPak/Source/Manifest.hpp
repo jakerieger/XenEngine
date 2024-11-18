@@ -9,6 +9,7 @@
 #include "BuildCache.hpp"
 #include "Processors.inl"
 
+#include <Types/SmartPtr.h>
 #include <future>
 #include <ranges>
 #include <thread>
@@ -42,24 +43,30 @@ public:
 
         // Load build cache if it exists
         const auto cacheFile = RootDir / ".build_cache";
-        if (exists(cacheFile)) { buildCache = BuildCache(cacheFile.string().c_str()); }
+        if (exists(cacheFile)) {
+            buildCache = std::make_unique<BuildCache>(cacheFile.string().c_str());
+        }
     }
 
-    void Build() {
+    ~Manifest() {
+        buildCache.reset();
+    }
+
+    void Build() const {
         const auto outputDir = CreateOutputDir();
         Vector<Pair<const Asset*, Path>> assetsToBuild;
         for (const auto& asset : Assets) {
             Path sourceFile = RootDir / asset.Source;
             bool rebuild    = false;
-            if (auto checksum = buildCache.GetChecksum(asset.Source)) {
+            if (auto checksum = buildCache->GetChecksum(asset.Source)) {
                 auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
                 if (currentHash != checksum) {
-                    buildCache.Update(asset.Source, currentHash);
+                    buildCache->Update(asset.Source, currentHash);
                     rebuild = true;
                 }
             } else {
                 auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
-                buildCache.Update(asset.Source, currentHash);
+                buildCache->Update(asset.Source, currentHash);
                 rebuild = true;
             }
 
@@ -86,24 +93,24 @@ public:
             if (future.valid()) future.get();
         }
 
-        buildCache.SaveToFile(RootDir.string());
+        buildCache->SaveToFile(RootDir.string());
     }
 
-    void Rebuild() {
+    void Rebuild() const {
         Clean();
         Build();
     }
 
-    void Clean() {
+    void Clean() const {
         const auto _         = CreateOutputDir();
         const auto cacheFile = RootDir / ".build_cache";
         if (exists(cacheFile)) { remove(cacheFile); }
-        buildCache.Assets.clear();
+        buildCache->Assets.clear();
     }
 
 private:
     Path manifestPath;
-    BuildCache buildCache;
+    Unique<BuildCache> buildCache;
 
     void CleanContentDirectory() const {
         if (FileSystem::exists(OutputDir)) { FileSystem::remove_all(OutputDir); }
