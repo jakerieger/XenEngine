@@ -51,6 +51,7 @@ find_package(pugixml CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
+find_package(liblzma CONFIG REQUIRED)
 
 target_link_libraries(XenEngine PRIVATE
         lua
@@ -58,6 +59,7 @@ target_link_libraries(XenEngine PRIVATE
         pugixml::pugixml
         glfw
         glm::glm
+        liblzma::liblzma
 )
 
 # TOOLS #

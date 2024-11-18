@@ -7,12 +7,16 @@
 using namespace Xen;
 
 int main() {
-    const auto ballTexture =
-      Expect(ContentManager::LoadTexture("sprites/ball"), "Failed to get ball sprite.");
-    const auto paddleTexture =
-      Expect(ContentManager::LoadTexture("sprites/paddle"), "Failed to get paddle sprite.");
-    const auto bgMusic =
-      Expect(ContentManager::LoadSound("audio/bg_music"), "Failed to get background music audio.");
+    const auto contentManager = std::make_unique<ContentManager>("Content");
+
+    auto result     = contentManager->LoadAsset("sprites/ball");
+    const auto ball = Expect(result, "Failed to load ball texture");
+
+    result            = contentManager->LoadAsset("sprites/paddle");
+    const auto paddle = Expect(result, "Failed to load paddle texture");
+
+    result             = contentManager->LoadAsset("audio/bg_music");
+    const auto bgMusic = Expect(result, "Failed to load bg music");
 
     return 0;
 }

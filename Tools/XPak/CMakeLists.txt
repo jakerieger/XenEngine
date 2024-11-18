@@ -19,7 +19,6 @@ add_executable(XPak
 )
 
 find_package(CLI11 CONFIG REQUIRED)
-find_package(liblzma CONFIG REQUIRED)
 
 target_link_libraries(XPak PRIVATE
         XenEngine
