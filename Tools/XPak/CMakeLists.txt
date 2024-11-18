@@ -14,13 +14,16 @@ add_executable(XPak
         Source/BuildCache.hpp
         Source/Processors.inl
         Source/main.cpp
-        Source/Compression.h
+        Source/Compression.inl
+        Source/PakFile.hpp
 )
 
 find_package(CLI11 CONFIG REQUIRED)
+find_package(liblzma CONFIG REQUIRED)
 
 target_link_libraries(XPak PRIVATE
         XenEngine
         pugixml::pugixml
         CLI11::CLI11
+        liblzma::liblzma
 )

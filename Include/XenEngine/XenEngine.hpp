@@ -11,6 +11,7 @@
 
 #define INC_DICTIONARY
 #define INC_VECTOR
+#define INC_OPTION
 
 #include <Types/STL.h>
 #include <Types/Cast.h>
@@ -435,4 +436,29 @@ namespace Xen {
         //                                       "Components",
         //                                       &GameObject::Components);
     }
+
+    class Asset {
+    public:
+        str Name;
+        Vector<u8> Data;
+
+        Asset() = default;
+    };
+
+    class ContentManager {
+    public:
+        ContentManager() = default;
+
+        static Option<Asset> LoadTexture(const str& name) {
+            return {};
+        }
+
+        static Option<Asset> LoadData(const str& name) {
+            return {};
+        }
+
+        static Option<Asset> LoadSound(const str& name) {
+            return {};
+        }
+    };
 }  // namespace Xen

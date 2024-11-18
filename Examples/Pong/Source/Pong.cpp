@@ -2,23 +2,17 @@
 // Created: 11/14/2024.
 //
 
-// #include <Types/Types.h>
-// #include <OpenGLTK/Include/Glfw/GlfwApp.h>
-//
-// class Pong final : public GLTK::IGlfwApp {
-// public:
-//     Pong(int width, int height) : IGlfwApp("Pong", width, height) {}
-//     void CreateGLResources() override;
-//     void DestroyGLResources() override;
-//     void Update() override;
-//     void Render() override;
-// };
-//
-// int main() {
-//     Pong app(1280, 720);
-//     app.Run();
-// }
+#include <XenEngine.hpp>
+
+using namespace Xen;
 
 int main() {
+    const auto ballTexture =
+      Expect(ContentManager::LoadTexture("sprites/ball"), "Failed to get ball sprite.");
+    const auto paddleTexture =
+      Expect(ContentManager::LoadTexture("sprites/paddle"), "Failed to get paddle sprite.");
+    const auto bgMusic =
+      Expect(ContentManager::LoadSound("audio/bg_music"), "Failed to get background music audio.");
+
     return 0;
 }

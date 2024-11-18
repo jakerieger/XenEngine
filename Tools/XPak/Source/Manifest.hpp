@@ -7,6 +7,8 @@
 #define INC_PAIR
 #include "Asset.hpp"
 #include "BuildCache.hpp"
+#include "Compression.inl"
+#include "PakFile.hpp"
 #include "Processors.inl"
 
 #include <Types/SmartPtr.h>
@@ -29,7 +31,7 @@ public:
         RootDir                     = canonical(Path(filename)).parent_path();
         const auto& rootNode        = doc.child("PakManifest");
         OutputDir                   = Path(rootNode.child_value("OutputDir"));
-        Compress                    = rootNode.child_value("Compress") == "true";
+        Compress                    = rootNode.child("Compress").text().as_bool();
         const auto& contentNode     = rootNode.child("Content");
         const auto& contentChildren = contentNode.children("Asset");
         const i64 assetCount        = std::distance(contentChildren.begin(), contentChildren.end());
@@ -45,6 +47,8 @@ public:
         const auto cacheFile = RootDir / ".build_cache";
         if (exists(cacheFile)) {
             buildCache = std::make_unique<BuildCache>(cacheFile.string().c_str());
+        } else {
+            buildCache = std::make_unique<BuildCache>();
         }
     }
 
@@ -84,7 +88,7 @@ public:
                 const int localId               = assetId.fetch_add(1);
                 std::cout << "  | [" << localId << "/" << assetsToBuild.size()
                           << "] Building asset: " << asset->Name << '\n';
-                BuildAsset(outputDir, *asset, Path(asset->Source));
+                BuildAsset(outputDir, *asset, Path(asset->Source), Compress);
             }));
         }
 
@@ -123,7 +127,10 @@ private:
         return contentDir;
     }
 
-    static void BuildAsset(const Path& outputDir, const Asset& asset, const Path& sourceFile) {
+    static void BuildAsset(const Path& outputDir,
+                           const Asset& asset,
+                           const Path& sourceFile,
+                           const bool compress = false) {
         auto outputFile = outputDir / sourceFile;
         outputFile.replace_extension(".xpak");
         if (FileSystem::exists(outputFile)) { FileSystem::remove(outputFile); }
@@ -144,7 +151,19 @@ private:
 
         if (data.empty()) { return; }
 
-        std::ofstream outFile(outputFile, std::ios::binary);
-        outFile.write(reinterpret_cast<char*>(data.data()), (std::streamsize)data.size());
+        const auto originalSize = data.size();
+        if (compress) {
+            std::cout << "  |  -  Compressing...\n";
+            const auto result = Compression::Compress(data);
+            if (result.has_value()) {
+                const auto& compressedData = result.value();
+                data.assign(compressedData.begin(), compressedData.end());
+                data.shrink_to_fit();  // probably not necessary
+            }
+        }
+
+        if (!PakFile::Write(data, outputFile, compress, originalSize)) {
+            std::cout << "  |  [ERROR] Writing to Pak file failed.\n";
+        }
     }
 };
