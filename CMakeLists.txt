@@ -41,8 +41,11 @@ include_directories(
 
 add_library(XenEngine STATIC
         ${SHARED}/Panic.hpp
-        ${INC}/XenEngine.hpp
-        ${SRC}/XenEngine.cpp
+        ${INC}/Component.hpp
+        ${INC}/ContentManager.hpp
+        ${INC}/GameObject.hpp
+        ${INC}/Scene.hpp
+        ${INC}/ScriptEngine.hpp
 )
 
 find_package(sol2 CONFIG REQUIRED)
