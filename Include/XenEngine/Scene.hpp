@@ -4,12 +4,10 @@
 
 #pragma once
 
-#define TYPES_ALL
-#define INC_VECTOR
-#define INC_OPTION
-#define INC_DICTIONARY
-#include <Types/Types.h>
+#include <Types.hpp>
 #include <ranges>
+#include <unordered_map>
+
 #include <pugixml.hpp>
 #include <Panic.hpp>
 #include <sol/sol.hpp>
@@ -20,7 +18,7 @@ namespace Xen {
     class Scene {
     public:
         str Name;
-        Dictionary<str, GameObject> GameObjects;
+        std::unordered_map<str, GameObject> GameObjects;
 
         explicit Scene(str name) : Name(std::move(name)) {
             GameObjects.clear();

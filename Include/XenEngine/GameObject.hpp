@@ -4,13 +4,9 @@
 
 #pragma once
 
-#define TYPES_ALL
-#define INC_VECTOR
-#define INC_OPTION
-#define INC_DICTIONARY
-#define INC_FUNCTION
-#include <Types/Types.h>
-#include <ranges>
+#include <Types.hpp>
+#include <vector>
+#include <unordered_map>
 
 #include "Component.hpp"
 
@@ -18,12 +14,12 @@ namespace Xen {
     class GameObject {
     public:
         bool Active = true;
-        Dictionary<str, Unique<IComponent>> Components;
+        std::unordered_map<str, Unique<IComponent>> Components;
 
         GameObject() = default;
         Unique<IComponent>& AddComponent(const str& name);
         void RemoveComponent(const str& name);
-        Vector<str> GetComponentNames();
+        std::vector<str> GetComponentNames();
         void Destroy();
 
         template<typename T>

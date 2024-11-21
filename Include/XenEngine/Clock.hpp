@@ -4,8 +4,8 @@
 
 #pragma once
 
-#define TYPES_ALL
-#include <Types/Types.h>
+#include <Types.hpp>
+#include <chrono>
 
 namespace Xen {
     class Clock {

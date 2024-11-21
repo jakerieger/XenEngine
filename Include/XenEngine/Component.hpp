@@ -4,8 +4,7 @@
 
 #pragma once
 
-#define TYPES_ALL
-#include <Types/Types.h>
+#include <Types.hpp>
 #include <type_traits>
 #include <glad/glad.h>
 

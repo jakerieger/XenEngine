@@ -4,12 +4,11 @@
 
 #pragma once
 
-#define TYPES_ALL
-#define INC_VECTOR
-#include <Types/Types.h>
+#include <Types.hpp>
 #include <glad/glad.h>
 #include <stb_image.h>
 #include <Panic.hpp>
+#include <vector>
 
 namespace Xen {
     class Texture {
@@ -25,7 +24,7 @@ namespace Xen {
 
             int w, h, channels;
             stbi_set_flip_vertically_on_load(true);  // For OpenGL
-            auto data = stbi_load(filename, &w, &h, &channels, 0);
+            const auto data = stbi_load(filename, &w, &h, &channels, 0);
             if (!data) { Panic("Failed to load image!"); }
 
             if (w) *width = w;
@@ -65,8 +64,34 @@ namespace Xen {
         /// @brief Loads a texture from data stored in memory. Assumes RGBA color format (4 bytes
         /// per pixel). See XPak source for specific details on how textures are processed for
         /// in-memory loading.
-        static u32
-        LoadFromMemory(const Vector<u8>& data, int* width = nullptr, int* height = nullptr) {
+        static u32 LoadFromMemory(const std::vector<u8>& data,
+                                  int width,
+                                  int height,
+                                  GLenum format = GL_RGBA) {
+            u32 id;
+            glGenTextures(1, &id);
+
+            glBindTexture(GL_TEXTURE_2D, id);
+            glTexImage2D(GL_TEXTURE_2D,
+                         0,
+                         CAST<int>(format),
+                         width,
+                         height,
+                         0,
+                         format,
+                         GL_UNSIGNED_BYTE,
+                         data.data());
+            glGenerateMipmap(GL_TEXTURE_2D);
+
+            glTexParameteri(GL_TEXTURE_2D,
+                            GL_TEXTURE_WRAP_S,
+                            format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D,
+                            GL_TEXTURE_WRAP_T,
+                            format == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
             return 0;
         }
 

@@ -7,7 +7,7 @@
 #include <filesystem>
 #include <unordered_map>
 #include <vector>
-#include <Types/Types.h>
+#include <Types.hpp>
 
 #define MAX_ASSET_SIZE 1e10
 

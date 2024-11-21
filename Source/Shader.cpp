@@ -13,7 +13,8 @@ namespace Xen {
         CompileShaders(vertexSource, fragmentSource);
     }
 
-    Shader::Shader(const Path& vertexPath, const Path& fragmentPath) {
+    Shader::Shader(const std::filesystem::path& vertexPath,
+                   const std::filesystem::path& fragmentPath) {
         if (!std::filesystem::exists(vertexPath) || !std::filesystem::exists(fragmentPath)) {
             Panic("Path does not exist: {}", vertexPath.string());
         }

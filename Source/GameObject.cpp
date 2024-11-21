@@ -3,6 +3,7 @@
 //
 
 #include "GameObject.hpp"
+#include <ranges>
 
 namespace Xen {
     Unique<IComponent>& GameObject::AddComponent(const str& name) {
@@ -18,8 +19,8 @@ namespace Xen {
         }
     }
 
-    Vector<str> GameObject::GetComponentNames() {
-        Vector<str> result;
+    std::vector<str> GameObject::GetComponentNames() {
+        std::vector<str> result;
         for (const auto& name : Components | std::views::keys) {
             result.push_back(name);
         }

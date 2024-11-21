@@ -4,9 +4,8 @@
 
 #pragma once
 
-#define TYPES_ALL
-#include <Types/Types.h>
-
+#include <Types.hpp>
+#include <filesystem>
 #include <glm/glm.hpp>
 
 namespace Xen {
@@ -16,7 +15,7 @@ namespace Xen {
     class Shader {
     public:
         Shader(const char* vertexSource, const char* fragmentSource);
-        Shader(const Path& vertexPath, const Path& fragmentPath);
+        Shader(const std::filesystem::path& vertexPath, const std::filesystem::path& fragmentPath);
         ~Shader();
 
         /// @brief Binds this shader to the OpenGL context

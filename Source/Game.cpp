@@ -19,8 +19,6 @@ namespace Xen {
         this->mClock      = std::make_shared<Clock>();
         // TODO: This should be read from the *.xproj file located in the project root
         this->mContentManager = std::make_shared<ContentManager>("Content");
-
-        ActiveGame = std::shared_ptr<IGame>(this);
     }
 
     IGame::~IGame() {
@@ -49,7 +47,7 @@ namespace Xen {
         glViewport(0, 0, mInitWidth, mInitHeight);
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-        CreateGLResources();
+        LoadContent();
 
         mClock->Start();
         while (!glfwWindowShouldClose(mWindow)) {
@@ -66,6 +64,6 @@ namespace Xen {
             mClock->Update();
         }
         mClock->Stop();
-        DestroyGLResources();
+        UnloadContent();
     }
 }  // namespace Xen

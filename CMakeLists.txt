@@ -42,9 +42,11 @@ include_directories(
 add_library(XenEngine STATIC
         ${STB_SRCS}
         ${GLAD_SRCS}
+        ${SHARED}/Types.hpp
         ${SHARED}/Panic.hpp
         ${SHARED}/IO.hpp
         ${SHARED}/Compression.hpp
+        ${SHARED}/Expect.hpp
         ${INC}/Component.hpp
         ${INC}/ContentManager.hpp
         ${INC}/GameObject.hpp

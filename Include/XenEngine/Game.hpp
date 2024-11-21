@@ -4,8 +4,7 @@
 
 #pragma once
 
-#define TYPES_ALL
-#include <Types/Types.h>
+#include <Types.hpp>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -20,8 +19,8 @@ namespace Xen {
         void Run();
         virtual ~IGame();
 
-        virtual void CreateGLResources()              = 0;
-        virtual void DestroyGLResources()             = 0;
+        virtual void LoadContent()                    = 0;
+        virtual void UnloadContent()                  = 0;
         virtual void Update(const Weak<Clock>& clock) = 0;
         virtual void Draw()                           = 0;
 
@@ -35,6 +34,4 @@ namespace Xen {
         int mCurrWidth;
         int mCurrHeight;
     };
-
-    static Shared<IGame> ActiveGame = nullptr;
 }  // namespace Xen

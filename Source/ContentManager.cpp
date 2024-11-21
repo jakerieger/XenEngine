@@ -6,7 +6,7 @@
 
 #include <fstream>
 #include <Compression.hpp>
-#include <Types/Cast.h>
+#include <Expect.hpp>
 
 namespace Xen {
     std::optional<Asset> ContentManager::LoadAsset(const str& name) {
