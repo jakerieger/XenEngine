@@ -36,5 +36,7 @@ namespace Xen {
         void Draw();
 
         void Destroy();
+
+        Camera* GetMainCamera();
     };
 }  // namespace Xen

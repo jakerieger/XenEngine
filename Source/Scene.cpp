@@ -225,4 +225,27 @@ namespace Xen {
             go.Destroy();
         }
     }
+
+    Camera* Scene::GetMainCamera() {
+        const auto it = GameObjects.find("MainCamera");
+        if (it == GameObjects.end()) {
+            std::cout
+              << "Warning: Could not find game object named 'MainCamera'. Xen will still be "
+                 "able to find the main camera object, but it will be much slower."
+              << std::endl;
+        } else {
+            const auto& go     = it->second;
+            const auto& camera = go.Components.at("Camera");
+            return camera->As<Camera>();
+        }
+
+        for (const auto& go : GameObjects | std::views::values) {
+            if (go.Components.contains("Camera")) {
+                const auto& camera = go.Components.at("Camera");
+                return camera->As<Camera>();
+            }
+        }
+
+        return nullptr;
+    }
 }  // namespace Xen
