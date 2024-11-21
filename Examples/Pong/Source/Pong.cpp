@@ -6,7 +6,6 @@
 #include <Texture.hpp>
 #include <ContentManager.hpp>
 #include <Game.hpp>
-#include <iostream>
 
 using namespace Xen;
 
