@@ -26,6 +26,7 @@ target_link_libraries(XEditor PRIVATE
         glfw
         glm::glm
         tinyfiledialogs::tinyfiledialogs
+        liblzma::liblzma
 )
 
 add_custom_command(TARGET XEditor PRE_BUILD

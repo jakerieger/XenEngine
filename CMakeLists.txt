@@ -40,12 +40,27 @@ include_directories(
 )
 
 add_library(XenEngine STATIC
+        ${STB_SRCS}
+        ${GLAD_SRCS}
         ${SHARED}/Panic.hpp
+        ${SHARED}/IO.hpp
+        ${SHARED}/Compression.hpp
         ${INC}/Component.hpp
         ${INC}/ContentManager.hpp
         ${INC}/GameObject.hpp
         ${INC}/Scene.hpp
         ${INC}/ScriptEngine.hpp
+        ${INC}/Graphics.hpp
+        ${INC}/Game.hpp
+        ${INC}/Clock.hpp
+        ${INC}/Shader.hpp
+        ${INC}/Texture.hpp
+        ${SRC}/Clock.cpp
+        ${SRC}/GameObject.cpp
+        ${SRC}/Scene.cpp
+        ${SRC}/ContentManager.cpp
+        ${SRC}/Game.cpp
+        ${SRC}/Shader.cpp
 )
 
 find_package(sol2 CONFIG REQUIRED)

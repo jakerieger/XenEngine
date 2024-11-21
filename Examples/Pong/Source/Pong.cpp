@@ -3,20 +3,28 @@
 //
 
 #include <ContentManager.hpp>
+#include <Game.hpp>
 
 using namespace Xen;
 
+class Pong final : public IGame {
+public:
+    Pong() : IGame("Pong") {}
+
+    void CreateGLResources() override {}
+
+    void DestroyGLResources() override {}
+
+    void Update(const Weak<Clock>& clock) override {
+        const auto dT = clock.lock()->GetDeltaTime();
+        std::cout << 1.f / dT << std::endl;
+    }
+
+    void Draw() override {}
+};
+
 int main() {
-    const auto contentManager = std::make_unique<ContentManager>("Content");
-
-    auto result     = contentManager->LoadAsset("sprites/ball");
-    const auto ball = Expect(result, "Failed to load ball texture");
-
-    result            = contentManager->LoadAsset("sprites/paddle");
-    const auto paddle = Expect(result, "Failed to load paddle texture");
-
-    result             = contentManager->LoadAsset("audio/bg_music");
-    const auto bgMusic = Expect(result, "Failed to load bg music");
-
+    Pong game;
+    game.Run();
     return 0;
 }

@@ -7,7 +7,12 @@
 #include "EditorLog.h"
 #include "EditorPreferences.hpp"
 #include "EditorStyle.hpp"
-#include "XenEngine.hpp"
+
+#include <Component.hpp>
+#include <GameObject.hpp>
+#include <Scene.hpp>
+#include <ScriptEngine.hpp>
+#include <functional>
 
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
