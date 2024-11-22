@@ -4,33 +4,35 @@
 
 #pragma once
 
-#define INC_PAIR
 #include "Asset.hpp"
 #include "BuildCache.hpp"
-#include "Compression.inl"
 #include "PakFile.hpp"
 #include "Processors.inl"
 
-#include <Types/SmartPtr.h>
+#include <Types.hpp>
+#include <Compression.hpp>
 #include <future>
 #include <ranges>
 #include <thread>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 class Manifest {
 public:
-    Path RootDir;
-    Path OutputDir;
+    fs::path RootDir;
+    fs::path OutputDir;
     bool Compress;
-    Vector<Asset> Assets;
+    std::vector<Asset> Assets;
 
     explicit Manifest(const str& filename) : Compress(false) {
         Assets.clear();
         pugi::xml_document doc;
         const pugi::xml_parse_result result = doc.load_file(filename.c_str());
         if (!result) { Panic("Failed to load manifest file"); }
-        RootDir                     = canonical(Path(filename)).parent_path();
+        RootDir                     = fs::canonical(filename).parent_path();
         const auto& rootNode        = doc.child("PakManifest");
-        OutputDir                   = Path(rootNode.child_value("OutputDir"));
+        OutputDir                   = fs::path(rootNode.child_value("OutputDir"));
         Compress                    = rootNode.child("Compress").text().as_bool();
         const auto& contentNode     = rootNode.child("Content");
         const auto& contentChildren = contentNode.children("Asset");
@@ -58,9 +60,9 @@ public:
 
     void Build() const {
         const auto outputDir = CreateOutputDir();
-        Vector<Pair<const Asset*, Path>> assetsToBuild;
+        std::vector<std::pair<const Asset*, fs::path>> assetsToBuild;
         for (const auto& asset : Assets) {
-            Path sourceFile = RootDir / asset.Source;
+            fs::path sourceFile = RootDir / asset.Source;
             bool rebuild    = false;
             if (auto checksum = buildCache->GetChecksum(asset.Source)) {
                 auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
@@ -81,14 +83,14 @@ public:
             }
         }
 
-        Vector<std::future<void>> futures;
+        std::vector<std::future<void>> futures;
         for (const auto& asset : assetsToBuild | std::views::keys) {
             futures.emplace_back(std::async(std::launch::async, [&]() {
                 static std::atomic<i32> assetId = 1;
                 const int localId               = assetId.fetch_add(1);
                 std::cout << "  | [" << localId << "/" << assetsToBuild.size()
                           << "] Building asset: " << asset->Name << '\n';
-                BuildAsset(outputDir, *asset, Path(asset->Source), Compress);
+                BuildAsset(outputDir, *asset, std::filesystem::path(asset->Source), Compress);
             }));
         }
 
@@ -113,30 +115,30 @@ public:
     }
 
 private:
-    Path manifestPath;
+    fs::path manifestPath;
     Unique<BuildCache> buildCache;
 
     void CleanContentDirectory() const {
-        if (FileSystem::exists(OutputDir)) { FileSystem::remove_all(OutputDir); }
+        if (fs::exists(OutputDir)) { fs::remove_all(OutputDir); }
     }
 
-    [[nodiscard]] Path CreateOutputDir() const {
+    [[nodiscard]] fs::path CreateOutputDir() const {
         const auto contentDir = RootDir / OutputDir;
         CleanContentDirectory();
-        FileSystem::create_directories(contentDir);
+        fs::create_directories(contentDir);
         return contentDir;
     }
 
-    static void BuildAsset(const Path& outputDir,
+    static void BuildAsset(const fs::path& outputDir,
                            const Asset& asset,
-                           const Path& sourceFile,
+                           const fs::path& sourceFile,
                            const bool compress = false) {
         auto outputFile = outputDir / sourceFile;
         outputFile.replace_extension(".xpak");
-        if (FileSystem::exists(outputFile)) { FileSystem::remove(outputFile); }
-        FileSystem::create_directories(outputFile.parent_path());
+        if (fs::exists(outputFile)) { fs::remove(outputFile); }
+        fs::create_directories(outputFile.parent_path());
 
-        Vector<u8> data;
+        std::vector<u8> data;
         switch (asset.Type) {
             case AssetType::Texture:
                 data = Processors::ProcessTexture(sourceFile);

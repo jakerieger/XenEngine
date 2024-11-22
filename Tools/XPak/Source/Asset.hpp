@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Types/Types.h>
+#include <Types.hpp>
 
 enum class AssetType {
     Texture,

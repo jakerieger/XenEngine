@@ -6,6 +6,7 @@
 
 #include <fstream>
 #include <Compression.hpp>
+#include <cstring>
 #include <Expect.hpp>
 
 namespace Xen {
@@ -42,13 +43,13 @@ namespace Xen {
         }
 
         bool compressed = false;
-        std::memcpy(&compressed, pakBytes.data() + 7, 1);
+        memcpy(&compressed, pakBytes.data() + 7, 1);
 
         size_t originalSize;
-        std::memcpy(&originalSize, pakBytes.data() + 8, sizeof(size_t));
+        memcpy(&originalSize, pakBytes.data() + 8, sizeof(size_t));
 
         std::vector<u8> srcData(pakBytes.size() - 16);
-        std::memcpy(srcData.data(), pakBytes.data() + 16, pakBytes.size() - 16);
+        memcpy(srcData.data(), pakBytes.data() + 16, pakBytes.size() - 16);
 
         std::vector<u8> data(originalSize);
         if (compressed) {
@@ -56,7 +57,7 @@ namespace Xen {
             auto decompressed = Expect(result, "Failed to decompress asset data");
             memcpy(data.data(), decompressed.data(), decompressed.size());
         } else {
-            std::memcpy(data.data(), srcData.data(), originalSize);
+            memcpy(data.data(), srcData.data(), originalSize);
         }
 
         return Asset(name, data);
@@ -64,13 +65,13 @@ namespace Xen {
 
     bool ContentManager::ValidatePakHeader(const std::vector<u8>& pakBytes) {
         char secret[5] = {'\0'};
-        std::memcpy(&secret[0], pakBytes.data(), 4);
+        memcpy(&secret[0], pakBytes.data(), 4);
         if (strcmp("XPAK", secret) != 0) { return false; }
 
         if (pakBytes[4] != '\0' || pakBytes[5] != '\0' || pakBytes[6] != '\0') { return false; }
 
         size_t originalSize;
-        std::memcpy(&originalSize, pakBytes.data() + 8, sizeof(size_t));
+        memcpy(&originalSize, pakBytes.data() + 8, sizeof(size_t));
         if (originalSize > (size_t)MAX_ASSET_SIZE) { return false; }
 
         if (originalSize < (pakBytes.size() - 16)) { return false; }

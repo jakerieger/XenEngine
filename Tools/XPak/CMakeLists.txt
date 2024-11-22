@@ -9,12 +9,12 @@ add_executable(XPak
         ${STB_SRCS}
         ${VEND}/sha256.h
         ${VEND}/sha256.cpp
+        ${SHARED}/Compression.hpp
         Source/Asset.hpp
         Source/Manifest.hpp
         Source/BuildCache.hpp
         Source/Processors.inl
         Source/main.cpp
-        Source/Compression.inl
         Source/PakFile.hpp
 )
 

@@ -9,17 +9,16 @@
 #include <Panic.hpp>
 #include <pugixml.hpp>
 #include <fstream>
+#include <optional>
 #include <sha256.h>
+#include <filesystem>
 
-#define INC_DICTIONARY
-#define INC_VECTOR
-#define INC_OPTION
-#include <Types/Cast.h>
-#include <Types/IO.h>
-#include <Types/STL.h>
+#include <Types.hpp>
+#include <unordered_map>
+#include <vector>
 
 struct BuildCache {
-    Dictionary<str, str> Assets;
+    std::unordered_map<str, str> Assets;
 
     BuildCache() = default;
 
@@ -46,11 +45,11 @@ struct BuildCache {
             sourceAttr.set_value(source.c_str());
             assetNode.text().set(checksum.c_str());
         }
-        const auto outFile = Path(rootDir) / ".build_cache";
+        const auto outFile = std::filesystem::path(rootDir) / ".build_cache";
         if (!doc.save_file(outFile.string().c_str())) { Panic("Failed to save build cache"); }
     }
 
-    Option<str> GetChecksum(const str& key) {
+    std::optional<str> GetChecksum(const str& key) {
         const auto it = Assets.find(key);
         if (it != Assets.end()) return it->second;
         return std::nullopt;
@@ -61,7 +60,7 @@ struct BuildCache {
         if (!file) { Panic("Failed to open file"); }
 
         SHA256 sha256;
-        Vector<char> buffer(4096);
+        std::vector<char> buffer(4096);
         while (file.read(buffer.data(), CAST<std::streamsize>(buffer.size())) ||
                file.gcount() > 0) {
             // Only update SHA256 if there's data read
