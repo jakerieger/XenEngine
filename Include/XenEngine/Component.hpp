@@ -4,9 +4,13 @@
 
 #pragma once
 
+#include <glm/glm.hpp>
 #include <Types.hpp>
 #include <type_traits>
 #include <glad/glad.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <sol/sol.hpp>
+#include <sol/state.hpp>
 
 namespace Xen {
     class IComponent {
@@ -30,6 +34,13 @@ namespace Xen {
         f32 RotationY;
         f32 ScaleX;
         f32 ScaleY;
+
+        [[nodiscard]] inline glm::mat4 GetMatrix() const {
+            // TODO: Incorporate rotation and scale transformations
+            return glm::translate(glm::mat4(1), glm::vec3(X, Y, 0));
+        }
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class Behavior final : public IComponent {
@@ -37,12 +48,19 @@ namespace Xen {
         str Script;
         Behavior() = default;
         explicit Behavior(str script) : Script(std::move(script)) {};
+        [[nodiscard]] str GetScriptPath() const {
+            return "Scripts/" + Script;
+        }
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class SpriteRenderer final : public IComponent {
     public:
         explicit SpriteRenderer() : VAO(0), VBO(0) {};
         void Draw() const {}
+
+        static void RegisterType(sol::state& state) {}
 
     private:
         GLuint VAO, VBO;
@@ -52,31 +70,43 @@ namespace Xen {
     class Rigidbody final : public IComponent {
     public:
         Rigidbody() = default;
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class BoxCollider final : public IComponent {
     public:
         BoxCollider() = default;
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class CircleCollider final : public IComponent {
     public:
         CircleCollider() = default;
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class PolygonCollider final : public IComponent {
     public:
         PolygonCollider() = default;
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class Camera final : public IComponent {
     public:
         Camera() = default;
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class AudioSource final : public IComponent {
     public:
         AudioSource() = default;
+
+        static void RegisterType(sol::state& state) {}
     };
 
     class ComponentFactory {

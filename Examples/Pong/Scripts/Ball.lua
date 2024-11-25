@@ -3,3 +3,10 @@
 --- Created by conta.
 --- DateTime: 11/23/2024 12:09 AM
 ---
+
+function onAwake(go)
+    print(go:GetName())
+end
+
+function onUpdate(go, dT)
+end

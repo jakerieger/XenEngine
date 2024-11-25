@@ -5,7 +5,7 @@
 #include "Scene.hpp"
 
 namespace Xen {
-    Unique<Scene> Scene::Load(const char* filename) {
+    Unique<Scene> Scene::Load(const char* filename, const Weak<ScriptEngine>& scriptEngine) {
         pugi::xml_document doc;
 
         const pugi::xml_parse_result result = doc.load_file(filename);
@@ -14,14 +14,13 @@ namespace Xen {
         const pugi::xml_node sceneRoot = doc.child("Scene");
         const auto sceneName           = sceneRoot.attribute("name").value();
 
-        auto scene = std::make_unique<Scene>(sceneName);
+        auto scene = std::make_unique<Scene>(sceneName, scriptEngine);
 
         for (auto go : sceneRoot.children("GameObject")) {
-            GameObject gameObject;
-
             const auto goName   = go.attribute("name").value();
             const auto goActive = go.attribute("active").value() == "true";
 
+            GameObject gameObject(goName);
             gameObject.Active = goActive;
 
             pugi::xml_node transformNode       = go.child("Transform");
@@ -187,36 +186,31 @@ namespace Xen {
         if (!doc.save_file(filename)) { Panic("Failed to save Scene file"); }
     }
 
-    void Scene::Awake(sol::state& scriptEngine) {
+    void Scene::Awake() {
         for (auto& go : GameObjects | std::views::values) {
-            if (auto compIter = go.Components.find("Behavior"); compIter != go.Components.end()) {
-                const auto& [name, component] = *compIter;
-                const auto behavior           = component->As<Behavior>();
-                scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
-                scriptEngine["onAwake"](go);
+            const auto behavior = go.GetComponent<Behavior>("Behavior");
+            if (behavior) {
+                mScriptEngine.lock()->ExecuteFunction(behavior->GetScriptPath(), "onAwake", go);
             }
         }
     }
 
-    void Scene::Update(sol::state& scriptEngine, f32 dT) {
+    void Scene::Update(f32 dT) {
         for (auto& go : GameObjects | std::views::values) {
-            if (auto compIter = go.Components.find("Behavior"); compIter != go.Components.end()) {
-                const auto& [name, component] = *compIter;
-                const auto behavior           = component->As<Behavior>();
-                scriptEngine.script_file("Scripts/" + behavior->Script, sol::load_mode::text);
-                scriptEngine["onUpdate"](go, dT);
+            const auto behavior = go.GetComponent<Behavior>("Behavior");
+            if (behavior) {
+                mScriptEngine.lock()->ExecuteFunction(behavior->GetScriptPath(),
+                                                      "onUpdate",
+                                                      go,
+                                                      dT);
             }
         }
     }
 
     void Scene::Draw() {
         for (auto& go : GameObjects | std::views::values) {
-            if (auto compIter = go.Components.find("Sprite Renderer");
-                compIter != go.Components.end()) {
-                const auto& [name, component] = *compIter;
-                const auto spriteRenderer     = component->As<SpriteRenderer>();
-                spriteRenderer->Draw();
-            }
+            const auto spriteRenderer = go.GetComponent<SpriteRenderer>("Sprite Renderer");
+            if (spriteRenderer) { spriteRenderer->Draw(); }
         }
     }
 

@@ -19,7 +19,7 @@ public:
     Pong() : IGame("Pong") {}
 
     void LoadContent() override {
-        mMainScene = Scene::Load("Scenes/Main.xscene");
+        mMainScene = Scene::Load("Scenes/Main.xscene", mScriptEngine);
 
         auto shader =
           std::make_shared<Shader>(Shaders::SpriteShader::Vertex, Shaders::SpriteShader::Fragment);

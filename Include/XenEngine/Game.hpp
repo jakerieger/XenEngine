@@ -10,6 +10,7 @@
 
 #include "Clock.hpp"
 #include "ContentManager.hpp"
+#include "ScriptEngine.hpp"
 
 // Handles window and context creation
 namespace Xen {
@@ -28,6 +29,7 @@ namespace Xen {
         GLFWwindow* mWindow = nullptr;
         Shared<Clock> mClock;
         Shared<ContentManager> mContentManager;
+        Shared<ScriptEngine> mScriptEngine;
         str mTitle;
         int mInitWidth;
         int mInitHeight;

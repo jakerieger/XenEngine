@@ -13,6 +13,7 @@
 #include <sol/sol.hpp>
 
 #include "GameObject.hpp"
+#include "ScriptEngine.hpp"
 
 namespace Xen {
     class Scene {
@@ -20,23 +21,27 @@ namespace Xen {
         str Name;
         std::unordered_map<str, GameObject> GameObjects;
 
-        explicit Scene(str name) : Name(std::move(name)) {
+        explicit Scene(str name, const Weak<ScriptEngine>& scriptEngine) : Name(std::move(name)) {
+            mScriptEngine = scriptEngine;
             GameObjects.clear();
         }
 
-        static Unique<Scene> Load(const char* filename);
+        static Unique<Scene> Load(const char* filename, const Weak<ScriptEngine>& scriptEngine);
 
         /// @brief Saves the scene to a file on disk (*.xscene)
         void Save(const char* filename) const;
 
-        void Awake(sol::state& scriptEngine);
+        void Awake();
 
-        void Update(sol::state& scriptEngine, f32 dT);
+        void Update(f32 dT);
 
         void Draw();
 
         void Destroy();
 
         Camera* GetMainCamera();
+
+    private:
+        Weak<ScriptEngine> mScriptEngine;
     };
 }  // namespace Xen
