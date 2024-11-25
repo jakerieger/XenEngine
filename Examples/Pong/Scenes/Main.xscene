@@ -13,10 +13,8 @@
             <Sprite>sprites/paddle</Sprite>
         </SpriteRenderer>
         <BoxCollider>
-            <Bounds>
-                <Width>24</Width>
-                <Height>200</Height>
-            </Bounds>
+            <Width>24</Width>
+            <Height>200</Height>
         </BoxCollider>
     </GameObject>
     <GameObject name="Opponent">
@@ -32,10 +30,8 @@
             <Sprite>sprites/paddle</Sprite>
         </SpriteRenderer>
         <BoxCollider>
-            <Bounds>
-                <Width>24</Width>
-                <Height>200</Height>
-            </Bounds>
+            <Width>24</Width>
+            <Height>200</Height>
         </BoxCollider>
     </GameObject>
     <GameObject name="Ball">
@@ -50,11 +46,23 @@
         <SpriteRenderer>
             <Sprite>sprites/ball</Sprite>
         </SpriteRenderer>
-        <BoxCollider>
-            <Bounds>
-                <Width>48</Width>
-                <Height>48</Height>
-            </Bounds>
-        </BoxCollider>
+        <CircleCollider>
+            <Radius>24</Radius>
+        </CircleCollider>
+    </GameObject>
+    <GameObject name="MainCamera">
+        <Transform>
+            <Position x="0.0" y="0.0"/>
+            <Rotation x="0.0" y="0.0"/>
+            <Scale x="1.0" y="1.0"/>
+        </Transform>
+        <Behavior>
+            <Script>MainCamera.lua</Script>
+        </Behavior>
+        <!-- TODO: Provide different types of cameras -->
+        <Camera>
+            <Width>1280</Width>
+            <Height>720</Height>
+        </Camera>
     </GameObject>
 </Scene>

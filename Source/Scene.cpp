@@ -222,8 +222,7 @@ namespace Xen {
 
     Camera* Scene::GetMainCamera() {
         if (GameObjects.contains("MainCamera")) {
-            const auto& camera = GameObjects.at("MainCamera").Components.at("Camera");
-            return camera->As<Camera>();
+            return GameObjects.at("MainCamera").GetComponent<Camera>("Camera");
         }
 
         std::cout << "Warning: Could not find game object named 'MainCamera'. Xen will still be "
