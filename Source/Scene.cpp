@@ -5,7 +5,7 @@
 #include "Scene.hpp"
 
 namespace Xen {
-    Unique<Scene> Scene::Load(const char* filename, const Shared<ScriptEngine>& scriptEngine) {
+    Unique<Scene> Scene::Load(const char* filename) {
         pugi::xml_document doc;
 
         const pugi::xml_parse_result result = doc.load_file(filename);
@@ -14,7 +14,7 @@ namespace Xen {
         const pugi::xml_node sceneRoot = doc.child("Scene");
         const auto sceneName           = sceneRoot.attribute("name").value();
 
-        auto scene = std::make_unique<Scene>(sceneName, scriptEngine);
+        auto scene = std::make_unique<Scene>(sceneName);
 
         for (auto go : sceneRoot.children("GameObject")) {
             const auto goName   = go.attribute("name").value();
@@ -190,7 +190,7 @@ namespace Xen {
         for (auto& go : GameObjects | std::views::values) {
             const auto behavior = go.GetComponent<Behavior>("Behavior");
             if (behavior) {
-                mScriptEngine->ExecuteFunction(behavior->GetScriptPath(), "onAwake", go);
+                ScriptEngine::Instance().ExecuteFunction(behavior->GetScriptPath(), "onAwake", go);
             }
         }
     }
@@ -199,7 +199,10 @@ namespace Xen {
         for (auto& go : GameObjects | std::views::values) {
             const auto behavior = go.GetComponent<Behavior>("Behavior");
             if (behavior) {
-                mScriptEngine->ExecuteFunction(behavior->GetScriptPath(), "onUpdate", go, dT);
+                ScriptEngine::Instance().ExecuteFunction(behavior->GetScriptPath(),
+                                                         "onUpdate",
+                                                         go,
+                                                         dT);
             }
         }
     }

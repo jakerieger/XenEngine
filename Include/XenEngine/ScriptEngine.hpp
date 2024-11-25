@@ -12,7 +12,16 @@
 namespace Xen {
     class ScriptEngine {
     public:
-        ScriptEngine() {
+        ScriptEngine(const ScriptEngine&)            = delete;
+        ScriptEngine& operator=(const ScriptEngine&) = delete;
+
+        static ScriptEngine& Instance() {
+            static ScriptEngine instance;
+            return instance;
+        }
+
+        void Initialize() {
+            mState = sol::state();
             mState.open_libraries(sol::lib::base);
             RegisterTypes();
         }
@@ -38,5 +47,8 @@ namespace Xen {
             AudioSource::RegisterType(mState);
             Camera::RegisterType(mState);
         }
+
+        ScriptEngine()  = default;
+        ~ScriptEngine() = default;
     };
 }  // namespace Xen
