@@ -21,12 +21,12 @@ namespace Xen {
         str Name;
         std::unordered_map<str, GameObject> GameObjects;
 
-        explicit Scene(str name, const Weak<ScriptEngine>& scriptEngine) : Name(std::move(name)) {
+        explicit Scene(str name, const Shared<ScriptEngine>& scriptEngine) : Name(std::move(name)) {
             mScriptEngine = scriptEngine;
             GameObjects.clear();
         }
 
-        static Unique<Scene> Load(const char* filename, const Weak<ScriptEngine>& scriptEngine);
+        static Unique<Scene> Load(const char* filename, const Shared<ScriptEngine>& scriptEngine);
 
         /// @brief Saves the scene to a file on disk (*.xscene)
         void Save(const char* filename) const;
@@ -42,6 +42,6 @@ namespace Xen {
         Camera* GetMainCamera();
 
     private:
-        Weak<ScriptEngine> mScriptEngine;
+        Shared<ScriptEngine> mScriptEngine;
     };
 }  // namespace Xen

@@ -5,7 +5,7 @@
 #include "Scene.hpp"
 
 namespace Xen {
-    Unique<Scene> Scene::Load(const char* filename, const Weak<ScriptEngine>& scriptEngine) {
+    Unique<Scene> Scene::Load(const char* filename, const Shared<ScriptEngine>& scriptEngine) {
         pugi::xml_document doc;
 
         const pugi::xml_parse_result result = doc.load_file(filename);
@@ -190,7 +190,7 @@ namespace Xen {
         for (auto& go : GameObjects | std::views::values) {
             const auto behavior = go.GetComponent<Behavior>("Behavior");
             if (behavior) {
-                mScriptEngine.lock()->ExecuteFunction(behavior->GetScriptPath(), "onAwake", go);
+                mScriptEngine->ExecuteFunction(behavior->GetScriptPath(), "onAwake", go);
             }
         }
     }
@@ -199,10 +199,7 @@ namespace Xen {
         for (auto& go : GameObjects | std::views::values) {
             const auto behavior = go.GetComponent<Behavior>("Behavior");
             if (behavior) {
-                mScriptEngine.lock()->ExecuteFunction(behavior->GetScriptPath(),
-                                                      "onUpdate",
-                                                      go,
-                                                      dT);
+                mScriptEngine->ExecuteFunction(behavior->GetScriptPath(), "onUpdate", go, dT);
             }
         }
     }

@@ -23,7 +23,6 @@ public:
 
         auto shader =
           std::make_shared<Shader>(Shaders::SpriteShader::Vertex, Shaders::SpriteShader::Fragment);
-
         auto camera = CreateCamera<OrthoCamera>(1280, 720);
     }
 
@@ -33,10 +32,12 @@ public:
 
     void Update(const Weak<Clock>& clock) override {
         const auto dT = clock.lock()->GetDeltaTime();
-        // mMainScene->Update({}, dT);
+        mMainScene->Update(dT);
     }
 
-    void Draw() override {}
+    void Draw() override {
+        mMainScene->Awake();
+    }
 
 private:
     Unique<Scene> mMainScene;

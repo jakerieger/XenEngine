@@ -19,7 +19,7 @@ namespace Xen {
 
         template<typename... Args>
         void ExecuteFunction(const str& script, const str& name, Args&&... args) {
-            mState.script_file(script, sol::load_mode::text);
+            mState.script_file(script);
             mState[name](std::forward<Args>(args)...);
         }
 
