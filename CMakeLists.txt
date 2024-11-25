@@ -31,9 +31,9 @@ file(GLOB IMGUI_SRCS
 )
 
 include_directories(
-        ${SRC}
         ${INC}
         ${SHARED}
+        ${SRC}
         ${VEND}
         ${VEND}/imgui
         ${VEND}/imgui/backends
@@ -42,26 +42,32 @@ include_directories(
 add_library(XenEngine STATIC
         ${STB_SRCS}
         ${GLAD_SRCS}
-        ${SHARED}/Types.hpp
-        ${SHARED}/Panic.hpp
-        ${SHARED}/IO.hpp
         ${SHARED}/Compression.hpp
         ${SHARED}/Expect.hpp
-        ${INC}/Component.hpp
-        ${INC}/ContentManager.hpp
-        ${INC}/GameObject.hpp
-        ${INC}/Scene.hpp
-        ${INC}/ScriptEngine.hpp
-        ${INC}/Graphics.hpp
-        ${INC}/Game.hpp
+        ${SHARED}/IO.hpp
+        ${SHARED}/Panic.hpp
+        ${SHARED}/Types.hpp
+        ${INC}/Buffer.hpp
+        ${INC}/Camera.hpp
         ${INC}/Clock.hpp
+        ${INC}/Component.hpp
+        ${INC}/CommonShaders.hpp
+        ${INC}/ContentManager.hpp
+        ${INC}/Game.hpp
+        ${INC}/GameObject.hpp
+        ${INC}/Graphics.hpp
+        ${INC}/Scene.hpp
+        ${INC}/SceneManager.hpp
+        ${INC}/ScriptEngine.hpp
         ${INC}/Shader.hpp
         ${INC}/Texture.hpp
+        ${INC}/VertexArray.hpp
+        ${SRC}/Camera.cpp
         ${SRC}/Clock.cpp
-        ${SRC}/GameObject.cpp
-        ${SRC}/Scene.cpp
         ${SRC}/ContentManager.cpp
         ${SRC}/Game.cpp
+        ${SRC}/GameObject.cpp
+        ${SRC}/Scene.cpp
         ${SRC}/Shader.cpp
 )
 
@@ -74,12 +80,12 @@ find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(liblzma CONFIG REQUIRED)
 
 target_link_libraries(XenEngine PRIVATE
-        lua
-        sol2
-        pugixml::pugixml
         glfw
         glm::glm
         liblzma::liblzma
+        lua
+        pugixml::pugixml
+        sol2
 )
 
 # TOOLS #

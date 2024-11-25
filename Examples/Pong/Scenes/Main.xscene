@@ -2,17 +2,41 @@
 <Scene name="Main">
     <GameObject name="Player">
         <Transform>
-            <Position x="0.0" y="0.0"/>
+            <Position x="-10.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
             <Scale x="1.0" y="1.0"/>
         </Transform>
+        <Behavior>
+            <Script>Player.lua</Script>
+        </Behavior>
+        <SpriteRenderer>
+            <Sprite>sprites/paddle</Sprite>
+        </SpriteRenderer>
+        <BoxCollider>
+            <Bounds>
+                <Width>24</Width>
+                <Height>200</Height>
+            </Bounds>
+        </BoxCollider>
     </GameObject>
     <GameObject name="Opponent">
         <Transform>
-            <Position x="0.0" y="0.0"/>
+            <Position x="10.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
             <Scale x="1.0" y="1.0"/>
         </Transform>
+        <Behavior>
+            <Script>Opponent.lua</Script>
+        </Behavior>
+        <SpriteRenderer>
+            <Sprite>sprites/paddle</Sprite>
+        </SpriteRenderer>
+        <BoxCollider>
+            <Bounds>
+                <Width>24</Width>
+                <Height>200</Height>
+            </Bounds>
+        </BoxCollider>
     </GameObject>
     <GameObject name="Ball">
         <Transform>
@@ -20,5 +44,17 @@
             <Rotation x="0.0" y="0.0"/>
             <Scale x="1.0" y="1.0"/>
         </Transform>
+        <Behavior>
+            <Script>Ball.lua</Script>
+        </Behavior>
+        <SpriteRenderer>
+            <Sprite>sprites/ball</Sprite>
+        </SpriteRenderer>
+        <BoxCollider>
+            <Bounds>
+                <Width>48</Width>
+                <Height>48</Height>
+            </Bounds>
+        </BoxCollider>
     </GameObject>
 </Scene>

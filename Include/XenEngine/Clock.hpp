@@ -43,7 +43,11 @@ namespace Xen {
         static u64 CpuTimestamp();
 
     private:
+#if defined(WIN32) || defined(WIN64)
+        using ClockTime = std::chrono::time_point<std::chrono::steady_clock>;
+#else
         using ClockTime = std::chrono::time_point<std::chrono::system_clock>;
+#endif
 
         bool mRunning  = false;
         f32 mDeltaTime = 0;

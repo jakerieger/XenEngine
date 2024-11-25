@@ -2,7 +2,10 @@
 // Created: 11/14/2024.
 //
 
+#include "Camera.hpp"
+#include "CommonShaders.hpp"
 #include "Scene.hpp"
+#include "Shader.hpp"
 
 #include <Expect.hpp>
 #include <Texture.hpp>
@@ -17,10 +20,15 @@ public:
 
     void LoadContent() override {
         mMainScene = Scene::Load("Scenes/Main.xscene");
+
+        auto shader =
+          std::make_shared<Shader>(Shaders::SpriteShader::Vertex, Shaders::SpriteShader::Fragment);
+
+        auto camera = CreateCamera<OrthoCamera>(1280, 720);
     }
 
     void UnloadContent() override {
-
+        mMainScene.reset();
     }
 
     void Update(const Weak<Clock>& clock) override {
