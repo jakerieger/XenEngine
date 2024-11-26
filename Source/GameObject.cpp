@@ -25,8 +25,8 @@ namespace Xen {
         // Call user-defined code first before destroying internal game object
         Destroyed();
 
-        for (auto it = Components.begin(); it != Components.end(); ++it) {
-            it->second.reset();
+        for (auto& component : Components | std::views::values) {
+            component.reset();
         }
         Components.clear();
     }
