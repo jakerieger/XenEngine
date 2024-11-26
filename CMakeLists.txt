@@ -93,5 +93,4 @@ target_link_libraries(XenEngine PRIVATE
 add_subdirectory(Tools/XEditor)
 add_subdirectory(Tools/XPak)
 
-add_subdirectory(Examples/PicklePuncher)
 add_subdirectory(Examples/Pong)

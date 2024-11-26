@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<Project name="PicklePuncher" version="1.0" author="Jake Rieger">
-    <ContentDirectory>Content</ContentDirectory>
-    <ScenesDirectory>Scenes</ScenesDirectory>
-    <ScriptsDirectory>Scripts</ScriptsDirectory>
-</Project>
