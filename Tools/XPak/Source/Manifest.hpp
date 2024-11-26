@@ -49,31 +49,30 @@ public:
         // Load build cache if it exists
         const auto cacheFile = RootDir / ".build_cache";
         if (exists(cacheFile)) {
-            buildCache = std::make_unique<BuildCache>(cacheFile.string().c_str());
+            mCache = std::make_unique<BuildCache>(cacheFile.string().c_str());
         } else {
-            buildCache = std::make_unique<BuildCache>();
+            mCache = std::make_unique<BuildCache>();
         }
     }
 
     ~Manifest() {
-        buildCache.reset();
+        mCache.reset();
     }
 
     void Build() const {
-        const auto outputDir = CreateOutputDir();
         std::vector<std::pair<const Asset*, fs::path>> assetsToBuild;
         for (const auto& asset : Assets) {
             fs::path sourceFile = RootDir / asset.Source;
             bool rebuild        = false;
-            if (auto checksum = buildCache->GetChecksum(asset.Source)) {
+            if (auto checksum = mCache->GetChecksum(asset.Source)) {
                 auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
                 if (currentHash != checksum) {
-                    buildCache->Update(asset.Source, currentHash);
+                    mCache->Update(asset.Source, currentHash);
                     rebuild = true;
                 }
             } else {
                 auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
-                buildCache->Update(asset.Source, currentHash);
+                mCache->Update(asset.Source, currentHash);
                 rebuild = true;
             }
 
@@ -91,7 +90,7 @@ public:
                 const int localId               = assetId.fetch_add(1);
                 std::cout << "  | [" << localId << "/" << assetsToBuild.size()
                           << "] Building asset: " << asset->Name << '\n';
-                BuildAsset(outputDir, *asset, std::filesystem::path(asset->Source), Compress);
+                BuildAsset(mContentDir, *asset, std::filesystem::path(asset->Source), Compress);
             }));
         }
 
@@ -100,24 +99,25 @@ public:
             if (future.valid()) future.get();
         }
 
-        buildCache->SaveToFile(RootDir.string());
+        mCache->SaveToFile(RootDir.string());
     }
 
-    void Rebuild() const {
+    void Rebuild() {
         Clean();
         Build();
     }
 
-    void Clean() const {
-        const auto _         = CreateOutputDir();
+    void Clean() {
+        mContentDir         = CreateOutputDir();
         const auto cacheFile = RootDir / ".build_cache";
         if (exists(cacheFile)) { remove(cacheFile); }
-        buildCache->Assets.clear();
+        mCache->Assets.clear();
     }
 
 private:
-    fs::path manifestPath;
-    Unique<BuildCache> buildCache;
+    fs::path mManifestPath;
+    Unique<BuildCache> mCache;
+    fs::path mContentDir;
 
     void CleanContentDirectory() const {
         if (fs::exists(OutputDir)) { fs::remove_all(OutputDir); }
@@ -171,6 +171,7 @@ private:
         }
 
         const auto metadataFile = outputFile.replace_extension(".xmdf");
+        if (fs::exists(metadataFile)) { fs::remove(metadataFile); }
         if (!MetadataFile::Write(metadataFile, metadata)) {
             std::cout << "  |  [ERROR] Writing to metadata file failed.\n";
         }

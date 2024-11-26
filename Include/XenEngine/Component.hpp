@@ -159,9 +159,8 @@ namespace Xen {
             }
 
             const auto data = spriteAsset->Data;
-            char* end;
-            const int width  = strtol(spriteAsset->Metadata.at("width").c_str(), &end, 10);
-            const int height = strtol(spriteAsset->Metadata.at("height").c_str(), &end, 10);
+            const auto width = ToInt(spriteAsset->Metadata.at("width"));
+            const auto height = ToInt(spriteAsset->Metadata.at("height"));
             mTexture         = Texture::LoadFromMemory(data, width, height);
 
             mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
