@@ -16,9 +16,8 @@ namespace Xen {
         u32 Usage = GL_STATIC_DRAW;
         std::vector<T> Data;
 
-        template<typename T2>
         std::size_t Size() {
-            return sizeof(T2) * Data.size();
+            return sizeof(T) * Data.size();
         }
     };
 

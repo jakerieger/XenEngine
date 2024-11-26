@@ -69,12 +69,16 @@ namespace Xen {
 
             if (spriteRendererNode) {
                 // Get sprite asset
-                const auto sprite        = spriteRendererNode.child_value("Sprite");
-                const auto loadResult    = contentManager->LoadAsset(sprite);
-                auto spriteAsset         = Expect(loadResult, "Failed to load sprite asset");
-                const auto spriteTexture = Texture::LoadFromMemory(spriteAsset.Data, 48, 48);
+                const auto sprite = spriteRendererNode.child_value("Sprite");
+                char* end;
+                const auto width      = (f32)strtod(spriteRendererNode.child_value("Width"), &end);
+                const auto height     = (f32)strtod(spriteRendererNode.child_value("Height"), &end);
+                const auto loadResult = contentManager->LoadAsset(sprite);
+                auto spriteAsset      = Expect(loadResult, "Failed to load sprite asset");
+                const auto spriteTexture =
+                  Texture::LoadFromMemory(spriteAsset.Data, (i32)width, (i32)height);
 
-                const auto& component     = gameObject.AddComponent("Sprite Renderer", sprite);
+                const auto& component = gameObject.AddComponent("Sprite Renderer", spriteTexture);
                 const auto spriteRenderer = component->As<SpriteRenderer>();
                 // Do stuff
             }
@@ -123,77 +127,77 @@ namespace Xen {
     }
 
     void Scene::Save(const char* filename) const {
-        // pugi::xml_document doc;
-        // pugi::xml_node sceneRoot = doc.append_child("Scene");
-        // auto sceneName           = sceneRoot.append_attribute("name");
-        // sceneName.set_value(Name.c_str());
-        //
-        // for (const auto& [goName, go] : GameObjects) {
-        //     auto goRoot   = sceneRoot.append_child("GameObject");
-        //     auto nameAttr = goRoot.append_attribute("name");
-        //     nameAttr.set_value(goName.c_str());
-        //     auto activeAttr = goRoot.append_attribute("active");
-        //     activeAttr.set_value(go.Active);
-        //
-        //     auto& components = go.Components;
-        //     for (auto compIter = components.begin(); compIter != components.end(); ++compIter) {
-        //         const auto& [name, component] = *compIter;
-        //
-        //         if (name == "Transform") {
-        //             const auto transform = component->As<Transform>();
-        //             auto transformRoot   = goRoot.append_child("Transform");
-        //             auto positionNode    = transformRoot.append_child("Position");
-        //             auto rotationNode    = transformRoot.append_child("Rotation");
-        //             auto scaleNode       = transformRoot.append_child("Scale");
-        //             {  // Position
-        //                 auto xAttr = positionNode.append_attribute("x");
-        //                 auto yAttr = positionNode.append_attribute("y");
-        //                 xAttr.set_value(transform->X);
-        //                 yAttr.set_value(transform->Y);
-        //             }
-        //             {  // Rotation
-        //                 auto xAttr = rotationNode.append_attribute("x");
-        //                 auto yAttr = rotationNode.append_attribute("y");
-        //                 xAttr.set_value(transform->RotationX);
-        //                 yAttr.set_value(transform->RotationY);
-        //             }
-        //             {  // Scale
-        //                 auto xAttr = scaleNode.append_attribute("x");
-        //                 auto yAttr = scaleNode.append_attribute("y");
-        //                 xAttr.set_value(transform->ScaleX);
-        //                 yAttr.set_value(transform->ScaleY);
-        //             }
-        //         } else if (name == "Behavior") {
-        //             const auto behavior = component->As<Behavior>();
-        //             auto behaviorRoot   = goRoot.append_child("Behavior");
-        //             auto scriptNode     = behaviorRoot.append_child("Script");
-        //             scriptNode.set_value(behavior->Script.c_str());
-        //         } else if (name == "Sprite Renderer") {
-        //             auto spriteRenderer     = component->As<SpriteRenderer>();
-        //             auto spriteRendererRoot = goRoot.append_child("SpriteRenderer");
-        //         } else if (name == "Rigidbody") {
-        //             auto rigidbody     = component->As<Rigidbody>();
-        //             auto rigidbodyRoot = goRoot.append_child("Rigidbody");
-        //         } else if (name == "Box Collider") {
-        //             auto boxCollider     = component->As<BoxCollider>();
-        //             auto boxColliderRoot = goRoot.append_child("BoxCollider");
-        //         } else if (name == "Circle Collider") {
-        //             auto circleCollider     = component->As<CircleCollider>();
-        //             auto circleColliderRoot = goRoot.append_child("CircleCollider");
-        //         } else if (name == "Polygon Collider") {
-        //             auto polygonCollider     = component->As<PolygonCollider>();
-        //             auto polygonColliderRoot = goRoot.append_child("PolygonCollider");
-        //         } else if (name == "Camera") {
-        //             auto camera     = component->As<Camera>();
-        //             auto cameraRoot = goRoot.append_child("Camera");
-        //         } else if (name == "Audio Source") {
-        //             auto audioSource     = component->As<AudioSource>();
-        //             auto audioSourceRoot = goRoot.append_child("AudioSource");
-        //         }
-        //     }
-        // }
-        //
-        // if (!doc.save_file(filename)) { Panic("Failed to save Scene file"); }
+        pugi::xml_document doc;
+        pugi::xml_node sceneRoot = doc.append_child("Scene");
+        auto sceneName           = sceneRoot.append_attribute("name");
+        sceneName.set_value(Name.c_str());
+
+        for (const auto& [goName, go] : GameObjects) {
+            auto goRoot   = sceneRoot.append_child("GameObject");
+            auto nameAttr = goRoot.append_attribute("name");
+            nameAttr.set_value(goName.c_str());
+            auto activeAttr = goRoot.append_attribute("active");
+            activeAttr.set_value(go.Active);
+
+            auto& components = go.Components;
+            for (auto compIter = components.begin(); compIter != components.end(); ++compIter) {
+                const auto& [name, component] = *compIter;
+
+                if (name == "Transform") {
+                    const auto transform = component->As<Transform>();
+                    auto transformRoot   = goRoot.append_child("Transform");
+                    auto positionNode    = transformRoot.append_child("Position");
+                    auto rotationNode    = transformRoot.append_child("Rotation");
+                    auto scaleNode       = transformRoot.append_child("Scale");
+                    {  // Position
+                        auto xAttr = positionNode.append_attribute("x");
+                        auto yAttr = positionNode.append_attribute("y");
+                        xAttr.set_value(transform->X);
+                        yAttr.set_value(transform->Y);
+                    }
+                    {  // Rotation
+                        auto xAttr = rotationNode.append_attribute("x");
+                        auto yAttr = rotationNode.append_attribute("y");
+                        xAttr.set_value(transform->RotationX);
+                        yAttr.set_value(transform->RotationY);
+                    }
+                    {  // Scale
+                        auto xAttr = scaleNode.append_attribute("x");
+                        auto yAttr = scaleNode.append_attribute("y");
+                        xAttr.set_value(transform->ScaleX);
+                        yAttr.set_value(transform->ScaleY);
+                    }
+                } else if (name == "Behavior") {
+                    const auto behavior = component->As<Behavior>();
+                    auto behaviorRoot   = goRoot.append_child("Behavior");
+                    auto scriptNode     = behaviorRoot.append_child("Script");
+                    scriptNode.set_value(behavior->Script.c_str());
+                } else if (name == "Sprite Renderer") {
+                    auto spriteRenderer     = component->As<SpriteRenderer>();
+                    auto spriteRendererRoot = goRoot.append_child("SpriteRenderer");
+                } else if (name == "Rigidbody") {
+                    auto rigidbody     = component->As<Rigidbody>();
+                    auto rigidbodyRoot = goRoot.append_child("Rigidbody");
+                } else if (name == "Box Collider") {
+                    auto boxCollider     = component->As<BoxCollider>();
+                    auto boxColliderRoot = goRoot.append_child("BoxCollider");
+                } else if (name == "Circle Collider") {
+                    auto circleCollider     = component->As<CircleCollider>();
+                    auto circleColliderRoot = goRoot.append_child("CircleCollider");
+                } else if (name == "Polygon Collider") {
+                    auto polygonCollider     = component->As<PolygonCollider>();
+                    auto polygonColliderRoot = goRoot.append_child("PolygonCollider");
+                } else if (name == "Camera") {
+                    auto camera     = component->As<Camera>();
+                    auto cameraRoot = goRoot.append_child("Camera");
+                } else if (name == "Audio Source") {
+                    auto audioSource     = component->As<AudioSource>();
+                    auto audioSourceRoot = goRoot.append_child("AudioSource");
+                }
+            }
+        }
+
+        if (!doc.save_file(filename)) { Panic("Failed to save Scene file"); }
     }
 
     void Scene::Awake() {
@@ -220,7 +224,13 @@ namespace Xen {
     void Scene::Draw() {
         for (auto& go : GameObjects | std::views::values) {
             const auto spriteRenderer = go.GetComponent<SpriteRenderer>("Sprite Renderer");
-            if (spriteRenderer) { spriteRenderer->Draw(); }
+            const auto transform      = go.GetComponent<Transform>("Transform");
+            if (!transform) { Panic("Sprite Renderer requires Transform component."); }
+            const auto camera = GetMainCamera();
+            if (!camera) { Panic("Scene is missing main camera."); }
+            if (spriteRenderer) {
+                spriteRenderer->Draw(transform, camera->GetCamera()->As<OrthoCamera>());
+            }
         }
     }
 

@@ -6,6 +6,10 @@
 
 #include "Shader.hpp"
 #include "CommonShaders.hpp"
+#include "Texture.hpp"
+#include "VertexArray.hpp"
+#include "Camera.hpp"
+#include "Primitives.hpp"
 
 #include <glm/glm.hpp>
 #include <Types.hpp>
@@ -77,25 +81,37 @@ namespace Xen {
 
     class SpriteRenderer final : public IComponent {
     public:
-        str Sprite;
-
-        SpriteRenderer() : mVao(0), mVbo(0), mTexture(0) {};
-        explicit SpriteRenderer(str sprite)
-            : Sprite(std::move(sprite)), mVao(0), mVbo(0), mTexture(0) {
-            mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
-                                               Shaders::SpriteShader::Fragment);
+        SpriteRenderer() : mTexture(0) {};
+        explicit SpriteRenderer(u32 texture) : mTexture(texture) {
+            Initialize();
         }
 
-        void Draw() const {}
+        ~SpriteRenderer() override {
+            mShader.reset();
+            mVAO.reset();
+            Texture::Delete(mTexture);
+        }
+
+        void Draw(const Transform* transform, const OrthoCamera* camera) const;
 
         static void RegisterType(sol::state& state) {}
 
     private:
-        u32 mVao;
-        u32 mVbo;
+        Unique<VertexArray> mVAO;
         Unique<Shader> mShader;
         u32 mTexture;
-        void Initialize() {}
+
+        void Initialize() {
+            mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
+                                               Shaders::SpriteShader::Fragment);
+            mVAO    = std::make_unique<VertexArray>();
+            std::vector<VertexAttribute> attributes = {
+              {"aVertex", 0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(f32), (void*)nullptr},
+            };
+            mVAO->Bind();
+            mVAO->CreateVertexBuffer<f32>(Primitives::QuadVertTex, attributes);
+            VertexArray::Unbind();
+        }
     };
 
     class Rigidbody final : public IComponent {
@@ -128,9 +144,20 @@ namespace Xen {
 
     class Camera final : public IComponent {
     public:
-        Camera() = default;
+        Camera() {
+            mCamera = CreateCamera<OrthoCamera>(1280, 720);
+        }
 
-        static void RegisterType(sol::state& state) {}
+        [[nodiscard]] ICamera* GetCamera() const {
+            return mCamera.get();
+        }
+
+        static void RegisterType(sol::state& state) {
+            state.new_usertype<Camera>("Camera");
+        }
+
+    private:
+        Shared<ICamera> mCamera;
     };
 
     class AudioSource final : public IComponent {
@@ -167,4 +194,18 @@ namespace Xen {
             return nullptr;
         }
     };
+
+    inline void SpriteRenderer::Draw(const Transform* transform, const OrthoCamera* camera) const {
+        mShader->Bind();
+        mShader->SetInt("uSprite", 0);
+        const auto model = transform->GetMatrix();
+        const auto mvp   = camera->GetViewProjection() * model;
+        mShader->SetMat4("uMVP", mvp);
+        Texture::Bind(mTexture, 0);
+        mVAO->Bind();
+        mVAO->Draw(GL_TRIANGLE_STRIP);
+        VertexArray::Unbind();
+        Texture::Unbind();
+        Shader::Unbind();
+    }
 }  // namespace Xen

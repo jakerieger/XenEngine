@@ -75,6 +75,17 @@ namespace Xen {
             mEBOs.push_back(ebo);
         }
 
+        static void SetAttributeDivisor(u32 index, u32 divisor) {
+            glVertexAttribDivisor(index, divisor);
+        }
+
+        void Draw(u32 primitive = GL_TRIANGLES) const {
+            glDrawArrays(primitive, 0, 4);
+        }
+
+        // TODO: Implement indexed drawing
+        // void DrawIndexed(u32 count, u32 primitive = GL_TRIANGLES) const {}
+
     private:
         u32 mVAO = 0;
         std::vector<u32> mVBOs;
