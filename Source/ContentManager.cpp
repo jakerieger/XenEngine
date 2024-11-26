@@ -11,7 +11,7 @@
 #include <pugixml.hpp>
 
 namespace Xen {
-    std::optional<Asset> ContentManager::LoadAsset(const str& name) {
+    std::optional<Shared<Asset>> ContentManager::LoadAsset(const str& name) {
         const auto it = mLoadedAssets.find(name);
         if (it != mLoadedAssets.end()) { return it->second; }
 
@@ -66,7 +66,9 @@ namespace Xen {
             return {};
         }
 
-        return Asset(name, data, metadata);
+        const auto asset = std::make_shared<Asset>(name, data, metadata);
+        mLoadedAssets.insert_or_assign(name, asset);
+        return mLoadedAssets.at(name);
     }
 
     bool ContentManager::ValidatePakHeader(const std::vector<u8>& pakBytes) {

@@ -68,14 +68,10 @@ namespace Xen {
             }
 
             if (spriteRendererNode) {
-                // Get sprite asset
                 const auto sprite     = spriteRendererNode.child_value("Sprite");
                 const auto loadResult = contentManager->LoadAsset(sprite);
                 auto spriteAsset      = Expect(loadResult, "Failed to load sprite asset");
-
                 const auto& component = gameObject.AddComponent("Sprite Renderer", spriteAsset);
-                const auto spriteRenderer = component->As<SpriteRenderer>();
-                // Do stuff
             }
 
             if (rigidbodyNode) {

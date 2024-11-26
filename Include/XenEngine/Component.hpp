@@ -87,7 +87,7 @@ namespace Xen {
     class SpriteRenderer final : public IComponent {
     public:
         SpriteRenderer() : mTexture(0) {};
-        explicit SpriteRenderer(const Asset& spriteAsset) : mTexture(0) {
+        explicit SpriteRenderer(const Shared<Asset>& spriteAsset) : mTexture(0) {
             Initialize(spriteAsset);
         }
 
@@ -106,18 +106,18 @@ namespace Xen {
         Unique<Shader> mShader;
         u32 mTexture;
 
-        void Initialize(const Asset& spriteAsset) {
-            if (!spriteAsset.Metadata.contains("width") ||
-                !spriteAsset.Metadata.contains("height")) {
+        void Initialize(const Shared<Asset>& spriteAsset) {
+            if (!spriteAsset->Metadata.contains("width") ||
+                !spriteAsset->Metadata.contains("height")) {
                 std::cerr << "ERROR: Invalid sprite metadata (missing 'width'/'height' properties)."
                           << std::endl;
                 return;
             }
 
-            const auto data = spriteAsset.Data;
+            const auto data = spriteAsset->Data;
             char* end;
-            const int width  = strtol(spriteAsset.Metadata.at("width").c_str(), &end, 10);
-            const int height = strtol(spriteAsset.Metadata.at("height").c_str(), &end, 10);
+            const int width  = strtol(spriteAsset->Metadata.at("width").c_str(), &end, 10);
+            const int height = strtol(spriteAsset->Metadata.at("height").c_str(), &end, 10);
             mTexture         = Texture::LoadFromMemory(data, width, height);
 
             mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,

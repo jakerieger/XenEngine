@@ -34,10 +34,10 @@ namespace Xen {
             this->mContentRoot = contentRoot;
         }
 
-        std::optional<Asset> LoadAsset(const str& name);
+        std::optional<Shared<Asset>> LoadAsset(const str& name);
 
     private:
-        std::unordered_map<str, Asset> mLoadedAssets;
+        std::unordered_map<str, Shared<Asset>> mLoadedAssets;
         std::filesystem::path mContentRoot;
 
         static bool ValidatePakHeader(const std::vector<u8>& pakBytes);
