@@ -33,7 +33,6 @@ namespace Xen {
 
         /// @brief Saves the scene to a file on disk (*.xscene)
         void Save(const char* filename) const;
-        void Awake();
         void Update(f32 dT);
         void Draw();
         void Destroy();

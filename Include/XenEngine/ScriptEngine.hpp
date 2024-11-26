@@ -22,7 +22,7 @@ namespace Xen {
 
         void Initialize() {
             mState = sol::state();
-            mState.open_libraries(sol::lib::base);
+            mState.open_libraries(sol::lib::base, sol::lib::string);
             RegisterTypes();
         }
 

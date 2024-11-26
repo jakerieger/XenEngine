@@ -19,11 +19,11 @@ public:
     Pong() : IGame("Pong") {}
 
     void LoadContent() override {
-        ScriptEngine::Instance().Initialize();
         mMainScene = Scene::Load("Scenes/Main.xscene");
     }
 
     void UnloadContent() override {
+        mMainScene->Destroy();
         mMainScene.reset();
     }
 

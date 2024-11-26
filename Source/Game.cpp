@@ -17,6 +17,7 @@ namespace Xen {
         this->mCurrWidth  = initWidth;
         this->mCurrHeight = initHeight;
         this->mClock      = std::make_shared<Clock>();
+        ScriptEngine::Instance().Initialize();
     }
 
     IGame::~IGame() {

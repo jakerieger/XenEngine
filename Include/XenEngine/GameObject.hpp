@@ -8,10 +8,9 @@
 #include <utility>
 #include <vector>
 #include <unordered_map>
+#include <sol/state.hpp>
 
 #include "Component.hpp"
-
-#include <sol/state.hpp>
 
 namespace Xen {
     class GameObject {
@@ -44,15 +43,12 @@ namespace Xen {
             return mName;
         }
 
-        static void RegisterType(sol::state& state) {
-            state.new_usertype<GameObject>("GameObject",
-                                           "Active",
-                                           &GameObject::Active,
-                                           "GetName",
-                                           &GameObject::GetName);
-        }
+        void Awake();
+
+        static void RegisterType(sol::state& state);
 
     private:
         str mName;
+        void Destroyed();
     };
 }  // namespace Xen

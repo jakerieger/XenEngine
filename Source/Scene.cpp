@@ -120,6 +120,7 @@ namespace Xen {
             }
 
             // Add to scene
+            gameObject.Awake();
             scene->GameObjects.insert_or_assign(goName, std::move(gameObject));
         }
 
@@ -198,15 +199,6 @@ namespace Xen {
         }
 
         if (!doc.save_file(filename)) { Panic("Failed to save Scene file"); }
-    }
-
-    void Scene::Awake() {
-        for (auto& go : GameObjects | std::views::values) {
-            const auto behavior = go.GetComponent<Behavior>("Behavior");
-            if (behavior) {
-                ScriptEngine::Instance().ExecuteFunction(behavior->GetScriptPath(), "onAwake", go);
-            }
-        }
     }
 
     void Scene::Update(f32 dT) {

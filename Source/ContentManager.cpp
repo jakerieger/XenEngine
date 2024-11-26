@@ -11,8 +11,6 @@
 
 namespace Xen {
     std::optional<Asset> ContentManager::LoadAsset(const str& name) {
-        std::cout << "Loading asset: " << name << '\n';
-
         const auto it = mLoadedAssets.find(name);
         if (it != mLoadedAssets.end()) { return it->second; }
 
