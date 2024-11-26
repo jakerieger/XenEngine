@@ -9,6 +9,7 @@
 #include "Texture.hpp"
 #include "VertexArray.hpp"
 #include "Camera.hpp"
+#include "ContentManager.hpp"
 #include "Primitives.hpp"
 
 #include <glm/glm.hpp>
@@ -44,8 +45,12 @@ namespace Xen {
         f32 ScaleY;
 
         [[nodiscard]] inline glm::mat4 GetMatrix() const {
-            // TODO: Incorporate rotation and scale transformations
-            return glm::translate(glm::mat4(1), glm::vec3(X, Y, 0));
+            auto mat = glm::mat4(1.0f);
+            mat      = glm::scale(mat, glm::vec3(ScaleX, ScaleY, 1.0f));
+            mat      = glm::rotate(mat, glm::radians(RotationX), glm::vec3(1.0f, 0.0f, 0.0f));
+            mat      = glm::rotate(mat, glm::radians(RotationY), glm::vec3(0.0f, 1.0f, 0.0f));
+            mat      = glm::translate(mat, glm::vec3(X, Y, 1.0f));
+            return mat;
         }
 
         static void RegisterType(sol::state& state) {
@@ -82,8 +87,8 @@ namespace Xen {
     class SpriteRenderer final : public IComponent {
     public:
         SpriteRenderer() : mTexture(0) {};
-        explicit SpriteRenderer(u32 texture) : mTexture(texture) {
-            Initialize();
+        explicit SpriteRenderer(const Asset& spriteAsset) : mTexture(0) {
+            Initialize(spriteAsset);
         }
 
         ~SpriteRenderer() override {
@@ -101,7 +106,20 @@ namespace Xen {
         Unique<Shader> mShader;
         u32 mTexture;
 
-        void Initialize() {
+        void Initialize(const Asset& spriteAsset) {
+            if (!spriteAsset.Metadata.contains("width") ||
+                !spriteAsset.Metadata.contains("height")) {
+                std::cerr << "ERROR: Invalid sprite metadata (missing 'width'/'height' properties)."
+                          << std::endl;
+                return;
+            }
+
+            const auto data = spriteAsset.Data;
+            char* end;
+            const int width  = strtol(spriteAsset.Metadata.at("width").c_str(), &end, 10);
+            const int height = strtol(spriteAsset.Metadata.at("height").c_str(), &end, 10);
+            mTexture         = Texture::LoadFromMemory(data, width, height);
+
             mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
                                                Shaders::SpriteShader::Fragment);
             mVAO    = std::make_unique<VertexArray>();

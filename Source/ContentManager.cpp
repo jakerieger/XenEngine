@@ -8,6 +8,7 @@
 #include <Compression.hpp>
 #include <cstring>
 #include <Expect.hpp>
+#include <pugixml.hpp>
 
 namespace Xen {
     std::optional<Asset> ContentManager::LoadAsset(const str& name) {
@@ -15,7 +16,7 @@ namespace Xen {
         if (it != mLoadedAssets.end()) { return it->second; }
 
         auto fileName = mContentRoot / name;
-        fileName.replace_extension(".xpak");
+        fileName.replace_extension(".xpkf");
         if (!exists(fileName)) {
             std::cout << "Unable to locate asset: " << fileName.string() << std::endl;
             return {};
@@ -58,7 +59,14 @@ namespace Xen {
             memcpy(data.data(), srcData.data(), originalSize);
         }
 
-        return Asset(name, data);
+        const auto metadataFile = fileName.replace_extension(".xmdf");
+        std::unordered_map<str, str> metadata;
+        if (!ReadMetadata(metadataFile, metadata)) {
+            std::cout << "Unable to read metadata: " << metadataFile.string() << std::endl;
+            return {};
+        }
+
+        return Asset(name, data, metadata);
     }
 
     bool ContentManager::ValidatePakHeader(const std::vector<u8>& pakBytes) {
@@ -73,6 +81,29 @@ namespace Xen {
         if (originalSize > (size_t)MAX_ASSET_SIZE) { return false; }
 
         if (originalSize < (pakBytes.size() - 16)) { return false; }
+
+        return true;
+    }
+
+    bool ContentManager::ReadMetadata(const std::filesystem::path& filename,
+                                      std::unordered_map<str, str>& metadata) {
+        pugi::xml_document doc;
+        if (!doc.load_file(filename.string().c_str())) {
+            std::cerr << "Failed to read file: " << filename.string() << std::endl;
+            return false;
+        }
+
+        const pugi::xml_node rootNode = doc.first_child();
+        if (!rootNode) {
+            std::cerr << "Failed to read file: " << filename.string() << std::endl;
+            return false;
+        }
+
+        for (const auto& node : rootNode.children()) {
+            const auto key = node.name();
+            const auto val = node.text().as_string();
+            metadata.insert_or_assign(key, val);
+        }
 
         return true;
     }

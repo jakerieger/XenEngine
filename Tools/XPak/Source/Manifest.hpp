@@ -6,6 +6,7 @@
 
 #include "Asset.hpp"
 #include "BuildCache.hpp"
+#include "MetadataFile.hpp"
 #include "PakFile.hpp"
 #include "Processors.inl"
 
@@ -63,7 +64,7 @@ public:
         std::vector<std::pair<const Asset*, fs::path>> assetsToBuild;
         for (const auto& asset : Assets) {
             fs::path sourceFile = RootDir / asset.Source;
-            bool rebuild    = false;
+            bool rebuild        = false;
             if (auto checksum = buildCache->GetChecksum(asset.Source)) {
                 auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
                 if (currentHash != checksum) {
@@ -134,20 +135,21 @@ private:
                            const fs::path& sourceFile,
                            const bool compress = false) {
         auto outputFile = outputDir / sourceFile;
-        outputFile.replace_extension(".xpak");
+        outputFile.replace_extension(".xpkf");
         if (fs::exists(outputFile)) { fs::remove(outputFile); }
         fs::create_directories(outputFile.parent_path());
 
         std::vector<u8> data;
+        std::unordered_map<str, str> metadata;
         switch (asset.Type) {
             case AssetType::Texture:
-                data = Processors::ProcessTexture(sourceFile);
+                data = Processors::ProcessTexture(sourceFile, metadata);
                 break;
             case AssetType::Audio:
-                data = Processors::ProcessAudio(sourceFile);
+                data = Processors::ProcessAudio(sourceFile, metadata);
                 break;
             case AssetType::Data:
-                data = Processors::ProcessData(sourceFile);
+                data = Processors::ProcessData(sourceFile, metadata);
                 break;
         }
 
@@ -166,6 +168,11 @@ private:
 
         if (!PakFile::Write(data, outputFile, compress, originalSize)) {
             std::cout << "  |  [ERROR] Writing to Pak file failed.\n";
+        }
+
+        const auto metadataFile = outputFile.replace_extension(".xmdf");
+        if (!MetadataFile::Write(metadataFile, metadata)) {
+            std::cout << "  |  [ERROR] Writing to metadata file failed.\n";
         }
     }
 };

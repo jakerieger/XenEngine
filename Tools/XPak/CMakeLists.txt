@@ -16,6 +16,7 @@ add_executable(XPak
         Source/Processors.inl
         Source/main.cpp
         Source/PakFile.hpp
+        Source/MetadataFile.hpp
 )
 
 find_package(CLI11 CONFIG REQUIRED)

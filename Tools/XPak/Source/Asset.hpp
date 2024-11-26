@@ -5,6 +5,7 @@
 #pragma once
 
 #include <Types.hpp>
+#include <unordered_map>
 
 enum class AssetType {
     Texture,

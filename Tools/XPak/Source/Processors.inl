@@ -13,7 +13,8 @@ class Processors {
 public:
     // TODO: Write the actual implementations for these
 
-    static std::vector<u8> ProcessTexture(const std::filesystem::path& filename) {
+    static std::vector<u8> ProcessTexture(const std::filesystem::path& filename,
+                                          std::unordered_map<str, str>& metadata) {
         int width, height, channels;
         stbi_set_flip_vertically_on_load(true);  // needed for OpenGL
         const stbi_uc* data =
@@ -22,10 +23,15 @@ public:
         std::vector<u8> result(width * height * channels);
         memcpy(result.data(), data, width * height * channels);
 
+        metadata.insert_or_assign("width", std::to_string(width));
+        metadata.insert_or_assign("height", std::to_string(height));
+        metadata.insert_or_assign("channels", std::to_string(channels));
+
         return result;
     }
 
-    static std::vector<u8> ProcessAudio(const std::filesystem::path& filename) {
+    static std::vector<u8> ProcessAudio(const std::filesystem::path& filename,
+                                        std::unordered_map<str, str>& metadata) {
         AudioFile<f32> audio;
         if (!audio.load(filename.string())) {
             std::cerr << "Failed to load audio file: " << filename.string() << std::endl;
@@ -46,11 +52,19 @@ public:
         std::vector<u8> result(interleavedData.size() * 4);  // Size of float in bytes
         memcpy(result.data(), interleavedData.data(), interleavedData.size() * 4);
 
+        metadata.insert_or_assign("channels", std::to_string(audio.getNumChannels()));
+        metadata.insert_or_assign("samples", std::to_string(numSamples));
+        metadata.insert_or_assign("format", "float");
+        metadata.insert_or_assign("bitdepth", std::to_string(audio.getBitDepth()));
+
         return result;
     }
 
-    static std::vector<u8> ProcessData(const std::filesystem::path& filename) {
-        return ReadFile(filename);
+    static std::vector<u8> ProcessData(const std::filesystem::path& filename,
+                                       std::unordered_map<str, str>& metadata) {
+        const auto data = ReadFile(filename);
+        metadata.insert_or_assign("size", std::to_string(data.size()));
+        return data;
     }
 
 private:

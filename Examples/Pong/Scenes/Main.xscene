@@ -4,15 +4,13 @@
         <Transform>
             <Position x="-10.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
-            <Scale x="1.0" y="1.0"/>
+            <Scale x="24.0" y="200.0"/>
         </Transform>
         <Behavior>
             <Script>Player.lua</Script>
         </Behavior>
         <SpriteRenderer>
             <Sprite>sprites/paddle</Sprite>
-            <Width>24.0</Width>
-            <Height>200.0</Height>
         </SpriteRenderer>
         <BoxCollider>
             <Width>24</Width>
@@ -23,15 +21,13 @@
         <Transform>
             <Position x="10.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
-            <Scale x="1.0" y="1.0"/>
+            <Scale x="24.0" y="200.0"/>
         </Transform>
         <Behavior>
             <Script>Opponent.lua</Script>
         </Behavior>
         <SpriteRenderer>
             <Sprite>sprites/paddle</Sprite>
-            <Width>24.0</Width>
-            <Height>200.0</Height>
         </SpriteRenderer>
         <BoxCollider>
             <Width>24</Width>
@@ -42,15 +38,13 @@
         <Transform>
             <Position x="0.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
-            <Scale x="1.0" y="1.0"/>
+            <Scale x="48.0" y="48.0"/>
         </Transform>
         <Behavior>
             <Script>Ball.lua</Script>
         </Behavior>
         <SpriteRenderer>
             <Sprite>sprites/ball</Sprite>
-            <Width>48.0</Width>
-            <Height>48.0</Height>
         </SpriteRenderer>
         <CircleCollider>
             <Radius>24</Radius>

@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <optional>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 #include <Types.hpp>
 
@@ -17,9 +18,11 @@ namespace Xen {
     public:
         str Name;
         std::vector<u8> Data;
+        std::unordered_map<str, str> Metadata;
 
         Asset() = default;
-        Asset(const str& name, const std::vector<u8>& data) : Name(name), Data(data) {}
+        Asset(str name, const std::vector<u8>& data, const std::unordered_map<str, str>& metadata)
+            : Name(std::move(name)), Data(data), Metadata(metadata) {}
     };
 
     // TODO: This class currently implements a 'lazy' method of asset loading.
@@ -38,5 +41,7 @@ namespace Xen {
         std::filesystem::path mContentRoot;
 
         static bool ValidatePakHeader(const std::vector<u8>& pakBytes);
+        static bool ReadMetadata(const std::filesystem::path& filename,
+                                 std::unordered_map<str, str>& metadata);
     };
 }  // namespace Xen
