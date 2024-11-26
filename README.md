@@ -1,7 +1,4 @@
-<p align="center">
-    <img src="logo.png" width="200" />
-</p>
-<h1 align="center">XEN Engine</h1>
+![](banner.jpg)
 
 **XEN Engine** is a simple 2D game engine for Windows based on OpenGL. It uses a
 `Scene -> GameObject -> Component`
