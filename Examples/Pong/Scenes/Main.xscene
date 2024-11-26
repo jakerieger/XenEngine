@@ -11,6 +11,8 @@
         </Behavior>
         <SpriteRenderer>
             <Sprite>sprites/paddle</Sprite>
+            <Width>24.0</Width>
+            <Height>200.0</Height>
         </SpriteRenderer>
         <BoxCollider>
             <Width>24</Width>
@@ -28,6 +30,8 @@
         </Behavior>
         <SpriteRenderer>
             <Sprite>sprites/paddle</Sprite>
+            <Width>24.0</Width>
+            <Height>200.0</Height>
         </SpriteRenderer>
         <BoxCollider>
             <Width>24</Width>
@@ -45,6 +49,8 @@
         </Behavior>
         <SpriteRenderer>
             <Sprite>sprites/ball</Sprite>
+            <Width>48.0</Width>
+            <Height>48.0</Height>
         </SpriteRenderer>
         <CircleCollider>
             <Radius>24</Radius>

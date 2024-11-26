@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "Shader.hpp"
+#include "CommonShaders.hpp"
+
 #include <glm/glm.hpp>
 #include <Types.hpp>
 #include <type_traits>
@@ -26,7 +29,8 @@ namespace Xen {
 
     class Transform final : public IComponent {
     public:
-        explicit Transform(f32 x = 0, f32 y = 0)
+        Transform() : X(0), Y(0), RotationX(0), RotationY(0), ScaleX(1), ScaleY(1) {};
+        explicit Transform(f32 x, f32 y)
             : X(x), Y(y), RotationX(0), RotationY(0), ScaleX(1), ScaleY(1) {};
         f32 X;
         f32 Y;
@@ -40,7 +44,21 @@ namespace Xen {
             return glm::translate(glm::mat4(1), glm::vec3(X, Y, 0));
         }
 
-        static void RegisterType(sol::state& state) {}
+        static void RegisterType(sol::state& state) {
+            state.new_usertype<Transform>("Transform",
+                                          "X",
+                                          &Transform::X,
+                                          "Y",
+                                          &Transform::Y,
+                                          "RotationX",
+                                          &Transform::RotationX,
+                                          "RotationY",
+                                          &Transform::RotationY,
+                                          "ScaleX",
+                                          &Transform::ScaleX,
+                                          "ScaleY",
+                                          &Transform::ScaleY);
+        }
     };
 
     class Behavior final : public IComponent {
@@ -52,18 +70,31 @@ namespace Xen {
             return "Scripts/" + Script;
         }
 
-        static void RegisterType(sol::state& state) {}
+        static void RegisterType(sol::state& state) {
+            state.new_usertype<Behavior>("Behavior", "Script", &Behavior::Script);
+        }
     };
 
     class SpriteRenderer final : public IComponent {
     public:
-        explicit SpriteRenderer() : VAO(0), VBO(0) {};
+        str Sprite;
+
+        SpriteRenderer() : mVao(0), mVbo(0), mTexture(0) {};
+        explicit SpriteRenderer(str sprite)
+            : Sprite(std::move(sprite)), mVao(0), mVbo(0), mTexture(0) {
+            mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
+                                               Shaders::SpriteShader::Fragment);
+        }
+
         void Draw() const {}
 
         static void RegisterType(sol::state& state) {}
 
     private:
-        GLuint VAO, VBO;
+        u32 mVao;
+        u32 mVbo;
+        Unique<Shader> mShader;
+        u32 mTexture;
         void Initialize() {}
     };
 
@@ -111,13 +142,14 @@ namespace Xen {
 
     class ComponentFactory {
     public:
-        static Unique<IComponent> CreateComponent(const str& name) {
+        template<typename... Args>
+        static Unique<IComponent> CreateComponent(const str& name, Args&&... args) {
             if (name == "Transform") {
                 return std::make_unique<Transform>();
             } else if (name == "Behavior") {
                 return std::make_unique<Behavior>();
             } else if (name == "Sprite Renderer") {
-                return std::make_unique<SpriteRenderer>();
+                return std::make_unique<SpriteRenderer>(std::forward<Args>(args)...);
             } else if (name == "Rigidbody") {
                 return std::make_unique<Rigidbody>();
             } else if (name == "Box Collider") {

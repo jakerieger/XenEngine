@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "ContentManager.hpp"
+
 #include <Types.hpp>
 #include <ranges>
 #include <unordered_map>
@@ -23,6 +25,8 @@ namespace Xen {
 
         explicit Scene(str name) : Name(std::move(name)) {
             GameObjects.clear();
+            // TODO: This should be read from the *.xproj file located in the project root
+            this->mContentManager = std::make_shared<ContentManager>("Content");
         }
 
         static Unique<Scene> Load(const char* filename);
@@ -35,5 +39,8 @@ namespace Xen {
         void Destroy();
 
         Camera* GetMainCamera();
+
+    private:
+        Shared<ContentManager> mContentManager;
     };
 }  // namespace Xen

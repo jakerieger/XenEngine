@@ -21,7 +21,6 @@ namespace Xen {
 
         explicit GameObject(str name) : mName(std::move(name)) {}
 
-        Unique<IComponent>& AddComponent(const str& name);
         void RemoveComponent(const str& name);
         std::vector<str> GetComponentNames();
         void Destroy();
@@ -31,6 +30,14 @@ namespace Xen {
             const auto it = Components.find(name);
             if (it == Components.end()) { return nullptr; }
             return it->second->As<T>();
+        }
+
+        template<typename... Args>
+        Unique<IComponent>& AddComponent(const str& name, Args&&... args) {
+            Components.insert_or_assign(
+              name,
+              ComponentFactory::CreateComponent(name, std::forward<Args>(args)...));
+            return Components.at(name);
         }
 
         [[nodiscard]] str GetName() const {

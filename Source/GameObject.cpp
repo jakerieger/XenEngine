@@ -6,11 +6,6 @@
 #include <ranges>
 
 namespace Xen {
-    Unique<IComponent>& GameObject::AddComponent(const str& name) {
-        Components.insert_or_assign(name, ComponentFactory::CreateComponent(name));
-        return Components.at(name);
-    }
-
     void GameObject::RemoveComponent(const str& name) {
         const auto it = Components.find(name);
         if (it != Components.end()) {

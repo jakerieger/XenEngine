@@ -17,8 +17,6 @@ namespace Xen {
         this->mCurrWidth  = initWidth;
         this->mCurrHeight = initHeight;
         this->mClock      = std::make_shared<Clock>();
-        // TODO: This should be read from the *.xproj file located in the project root
-        this->mContentManager = std::make_shared<ContentManager>("Content");
     }
 
     IGame::~IGame() {

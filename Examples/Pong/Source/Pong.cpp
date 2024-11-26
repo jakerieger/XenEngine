@@ -21,10 +21,6 @@ public:
     void LoadContent() override {
         ScriptEngine::Instance().Initialize();
         mMainScene = Scene::Load("Scenes/Main.xscene");
-
-        auto shader =
-          std::make_shared<Shader>(Shaders::SpriteShader::Vertex, Shaders::SpriteShader::Fragment);
-        auto camera = CreateCamera<OrthoCamera>(1280, 720);
     }
 
     void UnloadContent() override {
@@ -37,7 +33,7 @@ public:
     }
 
     void Draw() override {
-        mMainScene->Awake();
+        mMainScene->Draw();
     }
 
 private:

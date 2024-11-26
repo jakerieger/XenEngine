@@ -9,6 +9,8 @@
 #include <ostream>
 #include <string>
 
+/// @brief Rust-style expect for optional types. Terminates program on null value with exit code
+/// '-10'.
 template<typename T>
 T Expect(const std::optional<T>& opt, const std::string& message) {
     if (!opt.has_value()) {
