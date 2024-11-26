@@ -18,6 +18,8 @@ XEN Engine is still *very early* in development (read: unusable at the moment). 
 code
 to this repository every day, I'm just one dude building something for fun in his free time.
 
+> If you would like to see XEN in action, you can build and run the [Pong](Examples/Pong) example.
+
 ## Contributing
 
 XEN is currently **closed** for contributions right now. Once a solid foundation has been built and
