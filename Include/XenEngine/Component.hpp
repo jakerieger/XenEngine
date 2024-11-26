@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4096)
 
 #include "Shader.hpp"
 #include "CommonShaders.hpp"
@@ -53,6 +55,36 @@ namespace Xen {
             return mat;
         }
 
+        inline void Translate(f32 x, f32 y) {
+            X += x;
+            Y += y;
+        }
+
+        inline void Scale(f32 x, f32 y) {
+            ScaleX *= x;
+            ScaleY *= y;
+        }
+
+        inline void Rotate(f32 x, f32 y) {
+            RotationX += x;
+            RotationY += y;
+        }
+
+        inline void SetPosition(f32 x, f32 y) {
+            X = x;
+            Y = y;
+        }
+
+        inline void SetRotation(f32 x, f32 y) {
+            RotationX = x;
+            RotationY = y;
+        }
+
+        inline void SetScale(f32 x, f32 y) {
+            ScaleX = x;
+            ScaleY = y;
+        }
+
         static void RegisterType(sol::state& state) {
             state.new_usertype<Transform>("Transform",
                                           "X",
@@ -66,7 +98,19 @@ namespace Xen {
                                           "ScaleX",
                                           &Transform::ScaleX,
                                           "ScaleY",
-                                          &Transform::ScaleY);
+                                          &Transform::ScaleY,
+                                          "Translate",
+                                          &Transform::Translate,
+                                          "Rotate",
+                                          &Transform::Rotate,
+                                          "Scale",
+                                          &Transform::Scale,
+                                          "SetPosition",
+                                          &Transform::SetPosition,
+                                          "SetRotation",
+                                          &Transform::SetRotation,
+                                          "SetScale",
+                                          &Transform::SetScale);
         }
     };
 

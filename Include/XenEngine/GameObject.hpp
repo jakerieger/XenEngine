@@ -43,6 +43,10 @@ namespace Xen {
             return mName;
         }
 
+        [[nodiscard]] Transform* GetTransform() {
+            return GetComponent<Transform>("Transform");
+        }
+
         void Awake();
 
         static void RegisterType(sol::state& state);

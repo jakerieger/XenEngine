@@ -3,6 +3,8 @@
 //
 
 #pragma once
+#pragma warning(disable : 4244)
+#pragma warning(disable : 4096)
 
 #include <Types.hpp>
 #include <glm/glm.hpp>

@@ -42,7 +42,9 @@ namespace Xen {
                                        "Active",
                                        &GameObject::Active,
                                        "GetName",
-                                       &GameObject::GetName);
+                                       &GameObject::GetName,
+                                       "GetTransform",
+                                       &GameObject::GetTransform);
     }
 
     void GameObject::Destroyed() {
