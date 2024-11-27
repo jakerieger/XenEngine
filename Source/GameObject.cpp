@@ -34,7 +34,7 @@ namespace Xen {
     void GameObject::Awake() {
         const auto behavior = GetComponent<Behavior>("Behavior");
         if (!behavior) return;
-        ScriptEngine::Instance().ExecuteFunction(behavior->GetScriptPath(), "onAwake", this);
+        ScriptEngine::Get().ExecuteFunction(behavior->GetScriptPath(), "onAwake", this);
     }
 
     void GameObject::RegisterType(sol::state& state) {
@@ -50,6 +50,6 @@ namespace Xen {
     void GameObject::Destroyed() {
         const auto behavior = GetComponent<Behavior>("Behavior");
         if (!behavior) return;
-        ScriptEngine::Instance().ExecuteFunction(behavior->GetScriptPath(), "onDestroyed", this);
+        ScriptEngine::Get().ExecuteFunction(behavior->GetScriptPath(), "onDestroyed", this);
     }
 }  // namespace Xen

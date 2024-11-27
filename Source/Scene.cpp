@@ -46,18 +46,18 @@ namespace Xen {
                 auto yRotVal          = transformNode.child("Rotation").attribute("y").value();
                 auto xScaleVal        = transformNode.child("Scale").attribute("x").value();
                 auto yScaleVal        = transformNode.child("Scale").attribute("y").value();
-                auto x               = ToFloat(xVal);
-                auto y               = ToFloat(yVal);
-                auto xRot            = ToFloat(xRotVal);
-                auto yRot            = ToFloat(yRotVal);
-                auto xScale          = ToFloat(xScaleVal);
-                auto yScale          = ToFloat(yScaleVal);
-                transform->X         = x;
-                transform->Y         = y;
-                transform->RotationX = xRot;
-                transform->RotationY = yRot;
-                transform->ScaleX    = xScale;
-                transform->ScaleY    = yScale;
+                auto x                = ToFloat(xVal);
+                auto y                = ToFloat(yVal);
+                auto xRot             = ToFloat(xRotVal);
+                auto yRot             = ToFloat(yRotVal);
+                auto xScale           = ToFloat(xScaleVal);
+                auto yScale           = ToFloat(yScaleVal);
+                transform->X          = x;
+                transform->Y          = y;
+                transform->RotationX  = xRot;
+                transform->RotationY  = yRot;
+                transform->ScaleX     = xScale;
+                transform->ScaleY     = yScale;
             }
 
             if (behaviorNode) {
@@ -195,10 +195,7 @@ namespace Xen {
         for (auto& go : GameObjects | std::views::values) {
             const auto behavior = go.GetComponent<Behavior>("Behavior");
             if (behavior) {
-                ScriptEngine::Instance().ExecuteFunction(behavior->GetScriptPath(),
-                                                         "onUpdate",
-                                                         go,
-                                                         dT);
+                ScriptEngine::Get().ExecuteFunction(behavior->GetScriptPath(), "onUpdate", go, dT);
             }
         }
     }

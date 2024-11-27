@@ -10,6 +10,26 @@ namespace Xen {
         glViewport(0, 0, width, height);
     }
 
+    static void KeyHandler(GLFWwindow*, int key, int scancode, int action, int mods) {
+        if (action == GLFW_PRESS) {
+            Input::Get().UpdateKeyState(key, true);
+        } else if (action == GLFW_RELEASE) {
+            Input::Get().UpdateKeyState(key, false);
+        }
+    }
+
+    static void MouseButtonHandler(GLFWwindow*, int button, int action, int mods) {
+        if (action == GLFW_PRESS) {
+            Input::Get().UpdateMouseButtonState(button, true);
+        } else if (action == GLFW_RELEASE) {
+            Input::Get().UpdateMouseButtonState(button, false);
+        }
+    }
+
+    static void CursorPosHandler(GLFWwindow*, double x, double y) {
+        Input::Get().UpdateMousePosition((i32)x, (i32)y);
+    }
+
     IGame::IGame(str title, int initWidth, int initHeight) {
         this->mTitle      = std::move(title);
         this->mInitWidth  = initWidth;
@@ -17,7 +37,8 @@ namespace Xen {
         this->mCurrWidth  = initWidth;
         this->mCurrHeight = initHeight;
         this->mClock      = std::make_shared<Clock>();
-        ScriptEngine::Instance().Initialize();
+        ScriptEngine::Get().Initialize();
+        Input::Get().RegisterGlobals(ScriptEngine::Get().GetState());
     }
 
     IGame::~IGame() {
@@ -37,6 +58,9 @@ namespace Xen {
 
         glfwMakeContextCurrent(mWindow);
         glfwSetFramebufferSizeCallback(mWindow, ResizeHandler);
+        glfwSetKeyCallback(mWindow, KeyHandler);
+        glfwSetMouseButtonCallback(mWindow, MouseButtonHandler);
+        glfwSetCursorPosCallback(mWindow, CursorPosHandler);
 
         if (!gladLoadGLLoader(RCAST<GLADloadproc>(glfwGetProcAddress))) {
             glfwTerminate();
