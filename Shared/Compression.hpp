@@ -17,7 +17,7 @@ public:
     static std::optional<std::vector<uint8_t>> Compress(const std::vector<uint8_t>& data) {
         if (data.empty()) { return {}; }
         lzma_stream stream = LZMA_STREAM_INIT;
-        lzma_ret ret       = lzma_easy_encoder(&stream, LZMA_PRESET_DEFAULT, LZMA_CHECK_CRC64);
+        lzma_ret ret       = lzma_easy_encoder(&stream, LZMA_PRESET_EXTREME, LZMA_CHECK_CRC64);
         if (ret != LZMA_OK) {
             std::cerr << "LZMA error: " << ret << std::endl;
             return {};
