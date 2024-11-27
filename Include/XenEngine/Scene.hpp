@@ -37,7 +37,13 @@ namespace Xen {
         void Draw();
         void Destroy();
 
+        void DestroyGameObject(const str& name);
+
         Camera* GetMainCamera();
+
+        static void RegisterTypes(sol::state_view& sv) {
+            sv.new_usertype<Scene>("Scene", "DestroyGameObject", &Scene::DestroyGameObject);
+        }
 
     private:
         Shared<ContentManager> mContentManager;

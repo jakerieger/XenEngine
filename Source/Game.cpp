@@ -4,6 +4,7 @@
 
 #include "Game.hpp"
 #include "Panic.hpp"
+#include "Input.hpp"
 
 namespace Xen {
     static void ResizeHandler(GLFWwindow*, const int width, const int height) {

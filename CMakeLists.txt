@@ -71,6 +71,7 @@ add_library(XenEngine STATIC
         ${SRC}/GameObject.cpp
         ${SRC}/Input.cpp
         ${SRC}/Scene.cpp
+        ${SRC}/ScriptEngine.cpp
         ${SRC}/Shader.cpp
 )
 

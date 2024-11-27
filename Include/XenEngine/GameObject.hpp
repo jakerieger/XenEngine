@@ -25,10 +25,15 @@ namespace Xen {
         void Destroy();
 
         template<typename T>
-        T* GetComponent(const str& name) {
+        T* GetComponentAs(const str& name) {
             const auto it = Components.find(name);
             if (it == Components.end()) { return nullptr; }
             return it->second->As<T>();
+        }
+
+        IComponent* GetComponent(const str& name) {
+            if (!Components.contains(name)) { return nullptr; }
+            return Components[name].get();
         }
 
         template<typename... Args>
@@ -44,7 +49,7 @@ namespace Xen {
         }
 
         [[nodiscard]] Transform* GetTransform() {
-            return GetComponent<Transform>("Transform");
+            return GetComponentAs<Transform>("Transform");
         }
 
         void Awake();

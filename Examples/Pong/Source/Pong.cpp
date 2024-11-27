@@ -19,7 +19,8 @@ public:
     Pong() : IGame("Pong") {}
 
     void LoadContent() override {
-        mMainScene = Scene::Load("Scenes/Main.xscene");
+        mMainScene                                     = Scene::Load("Scenes/Main.xscene");
+        ScriptEngine::Get().GetState()["SceneManager"] = mMainScene.get();
     }
 
     void UnloadContent() override {

@@ -193,7 +193,7 @@ namespace Xen {
 
     void Scene::Update(f32 dT) {
         for (auto& go : GameObjects | std::views::values) {
-            const auto behavior = go.GetComponent<Behavior>("Behavior");
+            const auto behavior = go.GetComponentAs<Behavior>("Behavior");
             if (behavior) {
                 ScriptEngine::Get().ExecuteFunction(behavior->GetScriptPath(), "onUpdate", go, dT);
             }
@@ -202,8 +202,8 @@ namespace Xen {
 
     void Scene::Draw() {
         for (auto& go : GameObjects | std::views::values) {
-            const auto spriteRenderer = go.GetComponent<SpriteRenderer>("Sprite Renderer");
-            const auto transform      = go.GetComponent<Transform>("Transform");
+            const auto spriteRenderer = go.GetComponentAs<SpriteRenderer>("Sprite Renderer");
+            const auto transform      = go.GetComponentAs<Transform>("Transform");
             if (!transform) { Panic("Sprite Renderer requires Transform component."); }
             const auto camera = GetMainCamera();
             if (!camera) { Panic("Scene is missing main camera."); }
@@ -217,11 +217,19 @@ namespace Xen {
         for (auto& go : GameObjects | std::views::values) {
             go.Destroy();
         }
+        GameObjects.clear();
+    }
+
+    void Scene::DestroyGameObject(const str& name) {
+        if (!GameObjects.contains(name)) {
+            Panic("Scene does not have a game object named: %s", name.c_str());
+        }
+        GameObjects.erase(name);
     }
 
     Camera* Scene::GetMainCamera() {
         if (GameObjects.contains("MainCamera")) {
-            return GameObjects.at("MainCamera").GetComponent<Camera>("Camera");
+            return GameObjects.at("MainCamera").GetComponentAs<Camera>("Camera");
         }
 
         std::cout << "Warning: Could not find game object named 'MainCamera'. Xen will still be "

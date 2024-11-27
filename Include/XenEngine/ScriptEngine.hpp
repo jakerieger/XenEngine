@@ -4,9 +4,7 @@
 
 #pragma once
 
-#include "GameObject.hpp"
-#include "Input.hpp"
-
+#include <Types.hpp>
 #include <sol/sol.hpp>
 #include <sol/state.hpp>
 
@@ -44,18 +42,7 @@ namespace Xen {
     private:
         sol::state mState;
 
-        void RegisterTypes() {
-            GameObject::RegisterType(mState);
-            Transform::RegisterType(mState);
-            Behavior::RegisterType(mState);
-            Rigidbody::RegisterType(mState);
-            SpriteRenderer::RegisterType(mState);
-            BoxCollider::RegisterType(mState);
-            CircleCollider::RegisterType(mState);
-            PolygonCollider::RegisterType(mState);
-            AudioSource::RegisterType(mState);
-            Camera::RegisterType(mState);
-        }
+        void RegisterTypes();
 
         ScriptEngine()  = default;
         ~ScriptEngine() = default;

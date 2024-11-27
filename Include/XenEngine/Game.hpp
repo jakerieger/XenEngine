@@ -28,7 +28,6 @@ namespace Xen {
     protected:
         GLFWwindow* mWindow = nullptr;
         Shared<Clock> mClock;
-        Shared<ScriptEngine> mScriptEngine;
         str mTitle;
         int mInitWidth;
         int mInitHeight;
