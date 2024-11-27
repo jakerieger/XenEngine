@@ -14,3 +14,5 @@ out/
 target/
 **/.build_cache
 **/Build/
+*.xmdf
+*.xpkf
