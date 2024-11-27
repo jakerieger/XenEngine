@@ -4,13 +4,15 @@
 
 #pragma once
 
+#include "Types.hpp"
 #include <optional>
 #include <vector>
 #include <cstdint>
 #include <iostream>
 #include <lzma.h>
+#include <zlib.h>
 
-class Compression {
+class LZMA {
 public:
     static std::optional<std::vector<uint8_t>> Compress(const std::vector<uint8_t>& data) {
         if (data.empty()) { return {}; }
@@ -70,5 +72,64 @@ public:
 
         lzma_end(&stream);  // Clean up
         return decompressed;
+    }
+};
+
+class GZip {
+public:
+    static std::optional<std::vector<uint8_t>> Compress(const std::vector<uint8_t>& input) {
+        if (input.empty()) { return {}; }
+
+        uLongf compressedSize = compressBound(input.size());
+        std::vector<uint8_t> compressedData(compressedSize);
+
+        const auto result = compress(compressedData.data(),
+                                     &compressedSize,
+                                     RCAST<const Bytef*>(input.data()),
+                                     input.size());
+
+        if (result != Z_OK) {
+            std::cerr << "Compression error: " << result << std::endl;
+            return {};
+        }
+
+        compressedData.resize(compressedSize);
+        return compressedData;
+    }
+
+    static std::optional<std::vector<uint8_t>> Decompress(const std::vector<uint8_t>& data,
+                                                          const size_t originalSize) {
+        if (data.empty() || originalSize <= 0) { return {}; }
+
+        // Initial guess for decompressed size (can be adjusted later if needed)
+        uLongf decompressedSize = data.size() * 4;  // Start with a larger buffer
+        std::vector<uint8_t> decompressedData(decompressedSize);
+
+        // Attempt to decompress the data
+        int result =
+          uncompress(reinterpret_cast<Bytef*>(decompressedData.data()),  // Destination buffer
+                     &decompressedSize,                                  // Decompressed size
+                     data.data(),                                        // Input data
+                     data.size()                                         // Input size
+          );
+
+        // If the buffer was too small, resize and retry
+        if (result == Z_BUF_ERROR) {
+            decompressedSize *= 2;  // Double the buffer size and retry
+            decompressedData.resize(decompressedSize);
+
+            result = uncompress(reinterpret_cast<Bytef*>(decompressedData.data()),
+                                &decompressedSize,
+                                data.data(),
+                                data.size());
+        }
+
+        // Check if decompression was successful
+        if (result != Z_OK) {
+            throw std::runtime_error("Decompression failed with error code " +
+                                     std::to_string(result));
+        }
+
+        return decompressedData;
     }
 };

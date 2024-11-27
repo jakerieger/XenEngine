@@ -82,6 +82,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(tinyfiledialogs CONFIG REQUIRED)
 find_package(liblzma CONFIG REQUIRED)
+find_package(ZLIB REQUIRED)
 
 target_link_libraries(XenEngine PRIVATE
         glfw
@@ -90,10 +91,12 @@ target_link_libraries(XenEngine PRIVATE
         lua
         pugixml::pugixml
         sol2
+        ZLIB::ZLIB
 )
 
 # TOOLS #
 add_subdirectory(Tools/XEditor)
 add_subdirectory(Tools/XPak)
+add_subdirectory(Tools/XBuild)
 
 add_subdirectory(Examples/Pong)

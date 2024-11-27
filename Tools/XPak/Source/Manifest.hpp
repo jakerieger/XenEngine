@@ -158,7 +158,7 @@ private:
         const auto originalSize = data.size();
         if (compress) {
             std::cout << "  |  -  Compressing...\n";
-            const auto result = Compression::Compress(data);
+            const auto result = LZMA::Compress(data);
             if (result.has_value()) {
                 const auto& compressedData = result.value();
                 data.assign(compressedData.begin(), compressedData.end());

@@ -52,7 +52,7 @@ namespace Xen {
 
         std::vector<u8> data(originalSize);
         if (compressed) {
-            auto result       = Compression::Decompress(srcData, originalSize);
+            auto result       = LZMA::Decompress(srcData, originalSize);
             auto decompressed = Expect(result, "Failed to decompress asset data");
             memcpy(data.data(), decompressed.data(), decompressed.size());
         } else {
