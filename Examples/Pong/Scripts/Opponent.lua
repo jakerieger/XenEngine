@@ -1,6 +1,6 @@
 function onAwake(go)
-    -- Put initialization code here
-    print(string.format("GameObject<%s> created.", go:GetName()))
+    local transform = go:GetTransform()
+    transform:SetPosition(20, 0)
 end
 
 function onUpdate(go, dT)
@@ -8,6 +8,4 @@ function onUpdate(go, dT)
 end
 
 function onDestroyed(go)
-    -- Put cleanup code here
-    print(string.format("GameObject<%s> destroyed.", go:GetName()))
 end

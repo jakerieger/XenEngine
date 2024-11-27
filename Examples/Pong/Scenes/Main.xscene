@@ -4,7 +4,7 @@
         <Transform>
             <Position x="-10.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
-            <Scale x="24.0" y="200.0"/>
+            <Scale x="12.0" y="100.0"/>
         </Transform>
         <Behavior>
             <Script>Player.lua</Script>
@@ -21,7 +21,7 @@
         <Transform>
             <Position x="10.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
-            <Scale x="24.0" y="200.0"/>
+            <Scale x="12.0" y="100.0"/>
         </Transform>
         <Behavior>
             <Script>Opponent.lua</Script>
@@ -38,7 +38,7 @@
         <Transform>
             <Position x="0.0" y="0.0"/>
             <Rotation x="0.0" y="0.0"/>
-            <Scale x="48.0" y="48.0"/>
+            <Scale x="24.0" y="24.0"/>
         </Transform>
         <Behavior>
             <Script>Ball.lua</Script>
@@ -47,7 +47,7 @@
             <Sprite>sprites/ball</Sprite>
         </SpriteRenderer>
         <CircleCollider>
-            <Radius>24</Radius>
+            <Radius>12</Radius>
         </CircleCollider>
     </GameObject>
     <GameObject name="MainCamera">

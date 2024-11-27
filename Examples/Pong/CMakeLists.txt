@@ -13,11 +13,3 @@ target_link_libraries(Pong PRIVATE
         pugixml::pugixml
         glfw
 )
-
-add_custom_command(TARGET Pong PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/Scripts ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Scripts)
-
-add_custom_command(TARGET Pong PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/Scenes ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Scenes)
