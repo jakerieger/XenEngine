@@ -6,11 +6,11 @@ end
 function onUpdate(go, dT)
     local transform = go:GetTransform()
 
-    if (GetKey(KEY_UP)) then
+    if (GetKeyDown(KEY_UP)) then
         transform:Translate(0, 2.0 * dT)
     end
 
-    if (GetKey(KEY_DOWN)) then
+    if (GetKeyDown(KEY_DOWN)) then
         transform:Translate(0, -2.0 * dT)
     end
 end

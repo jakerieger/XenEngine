@@ -56,6 +56,7 @@ add_library(XenEngine STATIC
         ${INC}/Game.hpp
         ${INC}/GameObject.hpp
         ${INC}/Graphics.hpp
+        ${INC}/Input.hpp
         ${INC}/InputCodes.hpp
         ${INC}/Primitives.hpp
         ${INC}/Scene.hpp

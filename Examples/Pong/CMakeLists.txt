@@ -14,11 +14,6 @@ target_link_libraries(Pong PRIVATE
         glfw
 )
 
-# This command will only succeed if XPak has been ran prior!
-add_custom_command(TARGET Pong PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_SOURCE_DIR}/Content/Build ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Content)
-
 add_custom_command(TARGET Pong PRE_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/Scripts ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Scripts)
