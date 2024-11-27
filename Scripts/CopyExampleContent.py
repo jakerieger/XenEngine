@@ -20,6 +20,8 @@ def replace_directory(target_path, source_path):
     print(f"Copied directory: {source_path} to {target_path}")
 
 
-source = "../Examples/Pong/Content/Build"
-dest = "../build/Debug/bin/Examples/Pong/Content"
-replace_directory(dest, source)
+print("Copying example content.")
+source = "Examples/Pong/Content/Build"
+target = "build/Debug/bin/Examples/Pong/Content"
+replace_directory(target, source)
+print("Done.")
