@@ -4,14 +4,9 @@
 
 #pragma once
 
-#include <Types/Types.h>
-#include <Types/IO.h>
-#include <Types/SmartPtr.h>
-#define INC_VECTOR
-#define INC_DICTIONARY
-#define INC_QUEUE
-#define INC_MUTEX
-#include <Types/STL.h>
+#include <Types.hpp>
+#include <sstream>
+#include <vector>
 
 enum class LogLevel {
     Info,
@@ -30,41 +25,8 @@ enum class LogCategory {
     General,
 };
 
-static str LogLevelToString(const LogLevel& level) {
-    switch (level) {
-        case LogLevel::Info:
-            return "Info";
-        case LogLevel::Warning:
-            return "Warning";
-        case LogLevel::Error:
-            return "Error";
-        case LogLevel::Panic:
-            return "Panic";
-        case LogLevel::Debug:
-            return "Debug";
-    }
-
-    return "";
-}
-
-static str LogCategoryToString(const LogCategory& category) {
-    switch (category) {
-        case LogCategory::Graphics:
-            return "Graphics";
-        case LogCategory::Editor:
-            return "Editor";
-        case LogCategory::Audio:
-            return "Audio";
-        case LogCategory::Physics:
-            return "Physics";
-        case LogCategory::Input:
-            return "Input";
-        case LogCategory::General:
-            return "General";
-    }
-
-    return "";
-}
+static str LogLevelToString(const LogLevel& level);
+static str LogCategoryToString(const LogCategory& category);
 
 struct LogEntry {
     str Message;
@@ -72,25 +34,13 @@ struct LogEntry {
     LogCategory Category;
     std::time_t Timestamp;
 
-    [[nodiscard]] str ToString() const {
-        std::stringstream ss;
-        ss << "["
-           << "00:00:00"
-           << "] ";
-        ss << "|" << LogLevelToString(Level) << "| ";
-        ss << "Xen:" << LogCategoryToString(Category) << " ";
-        ss << Message << " ";
-        return ss.str();
-    }
+    [[nodiscard]] str ToString() const;
 };
 
 class Logger {
 public:
-    Vector<LogEntry> Entries;
+    std::vector<LogEntry> Entries;
 
     Logger() = default;
-
-    void Log(const str& message, LogLevel = LogLevel::Info, LogCategory = LogCategory::General) {
-        Entries.emplace_back(message, LogLevel::Info, LogCategory::General, std::time(nullptr));
-    }
+    void Log(const str& message, LogLevel = LogLevel::Info, LogCategory = LogCategory::General);
 };

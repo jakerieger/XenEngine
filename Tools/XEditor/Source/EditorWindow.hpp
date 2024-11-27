@@ -7,9 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#include <Types/Types.h>
-#include <Types/Cast.h>
-#include <Types/SmartPtr.h>
+#include <Types.hpp>
 
 #include "EditorUI.hpp"
 #include "Panic.hpp"
