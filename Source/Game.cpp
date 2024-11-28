@@ -67,6 +67,10 @@ namespace Xen {
         gEscToQuit = escToQuit;
 
         glfwMakeContextCurrent(mWindow);
+        glfwSetWindowUserPointer(
+          mWindow,
+          this);  // Provide a reference to our owning class for GLFW's static callbacks
+
         glfwSetFramebufferSizeCallback(mWindow, ResizeHandler);
         glfwSetKeyCallback(mWindow, KeyHandler);
         glfwSetMouseButtonCallback(mWindow, MouseButtonHandler);
