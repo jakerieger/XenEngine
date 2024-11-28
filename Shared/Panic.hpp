@@ -22,6 +22,8 @@ namespace Xen {
     }
 
 #ifndef Panic
+    /// @brief Terminates the program, displaying the provided error message as well as the file,
+    /// line, and function name where the panic occurred.
     #define Panic(fmt, ...) Xen::panic_impl(__FILE__, __LINE__, __FUNCTION__, fmt, ##__VA_ARGS__)
 #endif
 }  // namespace Xen
