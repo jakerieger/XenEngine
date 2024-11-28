@@ -8,11 +8,17 @@
 #include "Input.hpp"
 
 namespace Xen {
+    static bool gEscToQuit = false;
+
     static void ResizeHandler(GLFWwindow*, const int width, const int height) {
         glViewport(0, 0, width, height);
     }
 
-    static void KeyHandler(GLFWwindow*, int key, int scancode, int action, int mods) {
+    static void KeyHandler(GLFWwindow* window, int key, int scancode, int action, int mods) {
+        if (gEscToQuit) {
+            if (key == KeyCode::Escape) { glfwSetWindowShouldClose(window, true); }
+        }
+
         if (action == GLFW_PRESS) {
             Input::Get().UpdateKeyState(key, true);
         } else if (action == GLFW_RELEASE) {
@@ -49,7 +55,7 @@ namespace Xen {
         glfwTerminate();
     }
 
-    void IGame::Run() {
+    void IGame::Run(bool escToQuit) {
         if (!glfwInit()) { Panic("Failed to initialize GLFW"); }
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -57,6 +63,8 @@ namespace Xen {
 
         mWindow = glfwCreateWindow(mInitWidth, mInitHeight, mTitle.c_str(), nullptr, nullptr);
         if (!mWindow) { Panic("Failed to create GLFW window"); }
+
+        gEscToQuit = escToQuit;
 
         glfwMakeContextCurrent(mWindow);
         glfwSetFramebufferSizeCallback(mWindow, ResizeHandler);

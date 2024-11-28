@@ -44,6 +44,6 @@ private:
 
 int main() {
     Pong game;
-    game.Run();
+    game.Run(true);
     return 0;
 }

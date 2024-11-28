@@ -17,7 +17,7 @@ namespace Xen {
     class IGame {
     public:
         explicit IGame(str title, int initWidth = 1280, int initHeight = 720);
-        void Run();
+        void Run(bool escToQuit = false);
         virtual ~IGame();
 
         virtual void LoadContent()                    = 0;
@@ -33,5 +33,6 @@ namespace Xen {
         int mInitHeight;
         int mCurrWidth;
         int mCurrHeight;
+        bool mEscToQuit = false;
     };
 }  // namespace Xen
