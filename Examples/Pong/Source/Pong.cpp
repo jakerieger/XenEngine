@@ -19,11 +19,12 @@ public:
     Pong() : IGame("Pong") {}
 
     void LoadContent() override {
-        mMainScene                                     = Scene::Load("Scenes/Main.xscene");
-        ScriptEngine::Get().GetState()["SceneManager"] = mMainScene.get();
+        mMainScene = Scene::Load("Scenes/Main.xscene");
+        mMainScene->RegisterScene();
     }
 
     void UnloadContent() override {
+        Scene::UnregisterScene();
         mMainScene->Destroy();
         mMainScene.reset();
     }

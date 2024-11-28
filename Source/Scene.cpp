@@ -3,7 +3,6 @@
 //
 
 #include "Scene.hpp"
-
 #include "Expect.hpp"
 #include "Texture.hpp"
 
@@ -244,5 +243,15 @@ namespace Xen {
         }
 
         return nullptr;
+    }
+
+    void Scene::RegisterScene() {
+        auto& state           = ScriptEngine::Get().GetState();
+        state["SceneManager"] = this;
+    }
+
+    void Scene::UnregisterScene() {
+        auto& state           = ScriptEngine::Get().GetState();
+        state["SceneManager"] = nullptr;
     }
 }  // namespace Xen

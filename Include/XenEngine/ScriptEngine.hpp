@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Scene.hpp"
+
 #include <Types.hpp>
 #include <sol/sol.hpp>
 #include <sol/state.hpp>
@@ -37,6 +39,15 @@ namespace Xen {
         void ExecuteFunction(const str& script, const str& name, Args&&... args) {
             mState.script_file(script);
             mState[name](std::forward<Args>(args)...);
+        }
+
+        template<typename T>
+        void RegisterGlobal(const str& name, const T* global) {
+            mState[name] = global;
+        }
+
+        void UnregisterGlobal(const str& name) {
+            mState[name] = nullptr;
         }
 
     private:

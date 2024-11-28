@@ -45,6 +45,9 @@ namespace Xen {
             sv.new_usertype<Scene>("Scene", "DestroyGameObject", &Scene::DestroyGameObject);
         }
 
+        void RegisterScene();
+        static void UnregisterScene();
+
     private:
         Shared<ContentManager> mContentManager;
     };
