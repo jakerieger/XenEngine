@@ -129,16 +129,19 @@ namespace Xen {
             sv["InputManager"] = this;
         }
 
+        /// @warning This should never be called by developers, internal use ONLY.
         void UpdateKeyState(int key, bool pressed) {
             mKeyStates[key].Pressed  = pressed;
             mKeyStates[key].Released = !pressed;
         }
 
+        /// @warning This should never be called by developers, internal use ONLY.
         void UpdateMouseButtonState(int button, bool pressed) {
             mMouseStates[button].Pressed  = pressed;
             mMouseStates[button].Released = !pressed;
         }
 
+        /// @warning This should never be called by developers, internal use ONLY.
         void UpdateMousePosition(int x, int y) {
             mMouseX = x;
             mMouseY = y;

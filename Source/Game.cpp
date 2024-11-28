@@ -2,8 +2,9 @@
 // Created: 11/21/2024.
 //
 
+#include <Panic.hpp>
+
 #include "Game.hpp"
-#include "Panic.hpp"
 #include "Input.hpp"
 
 namespace Xen {
