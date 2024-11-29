@@ -158,14 +158,13 @@ namespace Xen {
                 return;
             }
 
-            const auto data = spriteAsset->Data;
-            const auto width = ToInt(spriteAsset->Metadata.at("width"));
+            const auto data   = spriteAsset->Data;
+            const auto width  = ToInt(spriteAsset->Metadata.at("width"));
             const auto height = ToInt(spriteAsset->Metadata.at("height"));
-            mTexture         = Texture::LoadFromMemory(data, width, height);
-
-            mShader = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
+            mTexture          = Texture::LoadFromMemory(data, width, height);
+            mShader           = std::make_unique<Shader>(Shaders::SpriteShader::Vertex,
                                                Shaders::SpriteShader::Fragment);
-            mVAO    = std::make_unique<VertexArray>();
+            mVAO              = std::make_unique<VertexArray>();
             std::vector<VertexAttribute> attributes = {
               {"aVertex", 0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(f32), (void*)nullptr},
             };

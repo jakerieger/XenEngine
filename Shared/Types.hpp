@@ -55,6 +55,10 @@ static f32 ToFloat(const str& val) {
     return std::stof(val);
 }
 
+// Allows you to define std::string literals the same way as char* pointers,
+// simply append "s" to the end of your double-quotes: "string"s
+using std::operator""s;
+
 static f32 ToFloat(const char* val) {
     char* end;
     return strtof(val, &end);
