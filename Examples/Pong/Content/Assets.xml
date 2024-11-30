@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Assets>
+    <Asset name="sprites/ball">
+        <Type>Texture</Type>
+        <Source>sprites/ball.png</Source>
+    </Asset>
+    <Asset name="sprites/paddle">
+        <Type>Texture</Type>
+        <Source>sprites/paddle.png</Source>
+    </Asset>
+    <Asset name="audio/bg_music">
+        <Type>Audio</Type>
+        <Source>audio/bg_music.wav</Source>
+    </Asset>
+</Assets>

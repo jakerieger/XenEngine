@@ -11,12 +11,15 @@ add_executable(XPak
         ${VEND}/sha256.cpp
         ${SHARED}/Compression.hpp
         Source/Asset.hpp
-        Source/Manifest.hpp
+        Source/AssetManifest.hpp
         Source/BuildCache.hpp
         Source/Processors.inl
         Source/main.cpp
         Source/PakFile.hpp
         Source/MetadataFile.hpp
+        Source/SceneManifest.hpp
+        Source/ScriptManifest.hpp
+        Source/Project.hpp
 )
 
 find_package(CLI11 CONFIG REQUIRED)

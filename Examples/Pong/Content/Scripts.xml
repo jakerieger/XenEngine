@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Scripts>
+    <Script>Ball.lua</Script>
+    <Script>MainCamera.lua</Script>
+    <Script>Opponent.lua</Script>
+    <Script>Player.lua</Script>
+</Scripts>

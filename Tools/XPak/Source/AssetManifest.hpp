@@ -19,32 +19,32 @@
 
 namespace fs = std::filesystem;
 
-class Manifest {
+class AssetManifest {
 public:
     fs::path RootDir;
     fs::path OutputDir;
     bool Compress;
     std::vector<Asset> Assets;
 
-    explicit Manifest(const str& filename) : Compress(false) {
-        Assets.clear();
-        pugi::xml_document doc;
-        const pugi::xml_parse_result result = doc.load_file(filename.c_str());
-        if (!result) { Panic("Failed to load manifest file"); }
-        RootDir                     = fs::canonical(filename).parent_path();
-        const auto& rootNode        = doc.child("PakManifest");
-        OutputDir                   = fs::path(rootNode.child_value("OutputDir"));
-        Compress                    = rootNode.child("Compress").text().as_bool();
-        const auto& contentNode     = rootNode.child("Content");
-        const auto& contentChildren = contentNode.children("Asset");
-        const i64 assetCount        = std::distance(contentChildren.begin(), contentChildren.end());
-        Assets.reserve(assetCount);
-        for (const auto& asset : contentChildren) {
-            const auto& assetName   = asset.attribute("name").as_string();
-            const auto& assetType   = asset.child_value("Type");
-            const auto& assetSource = asset.child_value("Source");
-            Assets.emplace_back(assetName, assetType, assetSource);
-        }
+    explicit AssetManifest(const Path& filename) : Compress(false) {
+        // Assets.clear();
+        // pugi::xml_document doc;
+        // const pugi::xml_parse_result result = doc.load_file(filename.c_str());
+        // if (!result) { Panic("Failed to load manifest file"); }
+        // RootDir                     = fs::canonical(filename).parent_path();
+        // const auto& rootNode        = doc.child("PakManifest");
+        // OutputDir                   = fs::path(rootNode.child_value("OutputDir"));
+        // Compress                    = rootNode.child("Compress").text().as_bool();
+        // const auto& contentNode     = rootNode.child("Content");
+        // const auto& contentChildren = contentNode.children("Asset");
+        // const i64 assetCount        = std::distance(contentChildren.begin(),
+        // contentChildren.end()); Assets.reserve(assetCount); for (const auto& asset :
+        // contentChildren) {
+        //     const auto& assetName   = asset.attribute("name").as_string();
+        //     const auto& assetType   = asset.child_value("Type");
+        //     const auto& assetSource = asset.child_value("Source");
+        //     Assets.emplace_back(assetName, assetType, assetSource);
+        // }
 
         // Load build cache if it exists
         const auto cacheFile = RootDir / ".build_cache";
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    ~Manifest() {
+    ~AssetManifest() {
         mCache.reset();
     }
 
@@ -108,7 +108,7 @@ public:
     }
 
     void Clean() {
-        mContentDir         = CreateOutputDir();
+        mContentDir          = CreateOutputDir();
         const auto cacheFile = RootDir / ".build_cache";
         if (exists(cacheFile)) { remove(cacheFile); }
         mCache->Assets.clear();

@@ -3,9 +3,10 @@
 //
 
 #include "Asset.hpp"
-#include "Manifest.hpp"
+#include "AssetManifest.hpp"
 #include "BuildCache.hpp"
 #include "Processors.inl"
+#include "Project.hpp"
 
 #include <CLI/CLI.hpp>
 
@@ -13,8 +14,8 @@ int main(int argc, char* argv[]) {
     CLI::App app("XEN Engine asset management and packing tool.", "XPak");
     argv = app.ensure_utf8(argv);
 
-    str manifestFilename;
-    app.add_option("-m,--manifest", manifestFilename, "Path to manifest file")->required();
+    str projectFilename;
+    app.add_option("-p,--project", projectFilename, "Path to project (*.xproj) file")->required();
     app.add_flag_callback(
       "-v, --version",
       [&]() {
@@ -28,11 +29,12 @@ int main(int argc, char* argv[]) {
     bool clean   = false;
 
     auto* buildCmd =
-      app.add_subcommand("build", "Build manifest.")->callback([&]() { build = true; });
-    auto* rebuildCmd =
-      app.add_subcommand("rebuild", "Rebuild manifest.")->callback([&]() { rebuild = true; });
+      app.add_subcommand("build", "Build project content.")->callback([&]() { build = true; });
+    auto* rebuildCmd = app.add_subcommand("rebuild", "Rebuild project content.")->callback([&]() {
+        rebuild = true;
+    });
     auto* cleanCmd =
-      app.add_subcommand("clean", "Clean manifest.")->callback([&]() { clean = true; });
+      app.add_subcommand("clean", "Clean project content.")->callback([&]() { clean = true; });
 
     app.require_subcommand(1);
     buildCmd->group("Action");
@@ -41,17 +43,17 @@ int main(int argc, char* argv[]) {
 
     CLI11_PARSE(app, argc, argv);
 
-    Manifest manifest(manifestFilename);
+    const auto project = Project::Load(projectFilename);
 
     if (build) {
-        std::cout << "Building manifest..." << std::endl;
-        manifest.Build();
+        std::cout << "Building project..." << std::endl;
+        project->Build();
     } else if (rebuild) {
-        std::cout << "Rebuilding manifest..." << std::endl;
-        manifest.Rebuild();
+        std::cout << "Rebuilding project..." << std::endl;
+        project->Rebuild();
     } else if (clean) {
-        std::cout << "Clean manifest..." << std::endl;
-        manifest.Clean();
+        std::cout << "Cleaning project..." << std::endl;
+        project->Clean();
     }
 
     return 0;

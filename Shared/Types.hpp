@@ -7,6 +7,7 @@
 #pragma region Primitives
 #include <cstdint>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 using u8  = uint8_t;
@@ -51,13 +52,11 @@ using Shared = std::shared_ptr<T>;
 template<typename T>
 using Weak = std::weak_ptr<T>;
 
+using Path = std::filesystem::path;
+
 static f32 ToFloat(const str& val) {
     return std::stof(val);
 }
-
-// Allows you to define std::string literals the same way as char* pointers,
-// simply append "s" to the end of your double-quotes: "string"s
-using std::operator""s;
 
 static f32 ToFloat(const char* val) {
     char* end;
@@ -101,3 +100,7 @@ static bool ToBool(const str& val) {
 static bool ToBool(const char* val) {
     return strcmp(val, "true") == 0 || strcmp(val, "True") == 0;
 }
+
+// Allows you to define std::string literals the same way as char* pointers,
+// simply append "s" to the end of your double-quotes: "string"s
+using std::operator""s;
