@@ -8,11 +8,15 @@
 
 class SceneManifest {
 public:
-    Path RootDir;
-
-    explicit SceneManifest(const Path& filename, const Path& root) : RootDir(root) {}
+    explicit
+    SceneManifest(const Path& filename, const Path& buildDir, const Weak<BuildCache>& buildCache)
+        : mBuildDir(buildDir), mBuildCache(buildCache) {}
 
     void Build() {}
     void Rebuild() {}
     void Clean() {}
+
+private:
+    Path mBuildDir;
+    Weak<BuildCache> mBuildCache;
 };

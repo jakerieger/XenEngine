@@ -19,7 +19,7 @@ public:
         stbi_set_flip_vertically_on_load(true);  // needed for OpenGL
         const stbi_uc* data =
           stbi_load(filename.string().c_str(), &width, &height, &channels, STBI_rgb_alpha);
-        if (!data) { Panic("Failed to load image"); }
+        if (!data) { Panic("Failed to load image: %s", filename.string().c_str()); }
         std::vector<u8> result(width * height * channels);
         memcpy(result.data(), data, width * height * channels);
 

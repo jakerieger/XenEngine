@@ -44,9 +44,16 @@ public:
             Panic("One or more manifest files not found");
         }
 
-        mAssets  = std::make_unique<AssetManifest>(assetsManifestFile, mRootDir);
-        mScenes  = std::make_unique<SceneManifest>(sceneManifestFile, mRootDir);
-        mScripts = std::make_unique<ScriptManifest>(scriptManifestFile, mRootDir);
+        const auto cacheFile = mRootDir / ".build_cache";
+        if (exists(cacheFile)) {
+            mBuildCache = std::make_shared<BuildCache>(cacheFile.string().c_str());
+        } else {
+            mBuildCache = std::make_shared<BuildCache>();
+        }
+
+        mAssets  = std::make_unique<AssetManifest>(assetsManifestFile, mBuildDir, mBuildCache);
+        mScenes  = std::make_unique<SceneManifest>(sceneManifestFile, mBuildDir, mBuildCache);
+        mScripts = std::make_unique<ScriptManifest>(scriptManifestFile, mBuildDir, mBuildCache);
 
         // TODO: Yes these error message suck, I'll fix it later (probably not but who knows)
         if (!mAssets || !mScenes || !mScripts) { Panic("One or more assets or scenes not found"); }
@@ -63,21 +70,30 @@ public:
     }
 
     void Build() const {
+        // Create the build directory
+        if (!exists(mBuildDir)) {
+            if (!create_directory(mBuildDir)) { Panic("Failed to create build directory"); }
+        }
+
         mAssets->Build();
         mScenes->Build();
         mScripts->Build();
+
+        mBuildCache->SaveToFile(mRootDir.string());
     }
 
     void Rebuild() const {
-        mAssets->Rebuild();
-        mScenes->Rebuild();
-        mScripts->Rebuild();
+        Clean();
+        Build();
     }
 
     void Clean() const {
         mAssets->Clean();
         mScenes->Clean();
         mScripts->Clean();
+        mBuildCache->Clear();
+        const auto cacheFile = mRootDir / ".build_cache";
+        if (exists(cacheFile)) { remove(cacheFile); }
     }
 
 private:
@@ -90,4 +106,5 @@ private:
     Unique<AssetManifest> mAssets;
     Unique<SceneManifest> mScenes;
     Unique<ScriptManifest> mScripts;
+    Shared<BuildCache> mBuildCache;
 };

@@ -8,11 +8,15 @@
 
 class ScriptManifest {
 public:
-    Path RootDir;
-
-    explicit ScriptManifest(const Path& filename, const Path& root) : RootDir(root) {}
+    explicit
+    ScriptManifest(const Path& filename, const Path& buildDir, const Weak<BuildCache>& buildCache)
+        : mBuildDir(buildDir), mBuildCache(buildCache) {}
 
     void Build() {}
     void Rebuild() {}
     void Clean() {}
+
+private:
+    Path mBuildDir;
+    Weak<BuildCache> mBuildCache;
 };

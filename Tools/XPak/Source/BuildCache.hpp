@@ -17,13 +17,12 @@
 #include <unordered_map>
 #include <vector>
 
-struct BuildCache {
-    std::unordered_map<str, str> Assets;
-
+class BuildCache {
+public:
     BuildCache() = default;
 
     explicit BuildCache(const char* filename) {
-        this->Assets.clear();
+        this->mFiles.clear();
         pugi::xml_document doc;
         const auto parseResult = doc.load_file(filename);
         if (!parseResult) { Panic("Failed to parse XML file"); }
@@ -32,14 +31,14 @@ struct BuildCache {
         for (auto& asset : cacheRoot.children("Asset")) {
             const auto& source   = asset.attribute("source").value();
             const auto& checksum = asset.text().as_string();
-            this->Assets.insert_or_assign(source, checksum);
+            this->mFiles.insert_or_assign(source, checksum);
         }
     }
 
     void SaveToFile(const str& rootDir) {
         pugi::xml_document doc;
         auto rootNode = doc.append_child("BuildCache");
-        for (const auto& [source, checksum] : this->Assets) {
+        for (const auto& [source, checksum] : this->mFiles) {
             auto assetNode  = rootNode.append_child("Asset");
             auto sourceAttr = assetNode.append_attribute("source");
             sourceAttr.set_value(source.c_str());
@@ -50,8 +49,8 @@ struct BuildCache {
     }
 
     std::optional<str> GetChecksum(const str& key) {
-        const auto it = Assets.find(key);
-        if (it != Assets.end()) return it->second;
+        const auto it = mFiles.find(key);
+        if (it != mFiles.end()) return it->second;
         return std::nullopt;
     }
 
@@ -80,10 +79,13 @@ struct BuildCache {
     }
 
     void Update(const str& key, const str& value) {
-        this->Assets.insert_or_assign(key, value);
+        this->mFiles.insert_or_assign(key, value);
     }
 
     void Clear() {
-        this->Assets.clear();
+        this->mFiles.clear();
     }
+
+private:
+    std::unordered_map<str, str> mFiles;
 };
