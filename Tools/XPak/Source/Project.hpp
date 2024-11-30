@@ -15,84 +15,79 @@
 
 class Project {
 public:
-    Project() = default;
-    str Name;
-    str Version;
-    str Author;
-    Path RootDirectory;
-    Path ContentDirectory;
-    Path BuildDirectory;
-    Unique<AssetManifest> Assets;
-    Unique<SceneManifest> Scenes;
-    Unique<ScriptManifest> Scripts;
-
-    [[nodiscard]] str ToString() const {
-        std::ostringstream os;
-        os << Name << '\n';
-        os << Version << '\n';
-        os << Author << '\n';
-        os << ContentDirectory.string() << '\n';
-        os << BuildDirectory.string() << '\n';
-        return os.str();
-    }
-
-    static Unique<Project> Load(const Path& filename) {
+    explicit Project(const Path& filename) {
         if (!exists(filename)) { Panic("Project file not found"); }
-        auto project = std::make_unique<Project>();
 
         // Parse project file
         pugi::xml_document doc;
         const pugi::xml_parse_result result = doc.load_file(filename.c_str());
-        if (!result) { Panic("Project file could not be parsed."); }
+        if (not result) { Panic("Project file could not be parsed."); }
 
-        const auto root  = doc.child("Project");
-        project->Name    = root.attribute("name").as_string();
-        project->Version = root.attribute("version").as_string();
-        project->Author  = root.attribute("author").as_string();
+        const auto root = doc.child("Project");
+        mName           = root.attribute("name").as_string();
+        mVersion        = root.attribute("version").as_string();
+        mAuthor         = root.attribute("author").as_string();
 
-        const Path contentDir     = root.child_value("ContentDirectory");
-        const Path buildDir       = root.child_value("BuildDirectory");
-        project->ContentDirectory = canonical(contentDir);
-        project->RootDirectory    = project->ContentDirectory.parent_path();
-        project->BuildDirectory   = project->RootDirectory / buildDir;
+        const Path contentDir = root.child_value("ContentDirectory");
+        const Path buildDir   = root.child_value("BuildDirectory");
+        mContentDir           = canonical(contentDir);
+        mRootDir              = mContentDir.parent_path();
+        mBuildDir             = mRootDir / buildDir;
 
         // Parse manifest files
-        const auto assetsManifestFile = project->RootDirectory / "Assets.xml";
-        const auto sceneManifestFile  = project->RootDirectory / "Scenes.xml";
-        const auto scriptManifestFile = project->RootDirectory / "Scripts.xml";
+        const auto assetsManifestFile = mContentDir / "Assets.xml";
+        const auto sceneManifestFile  = mContentDir / "Scenes.xml";
+        const auto scriptManifestFile = mContentDir / "Scripts.xml";
 
         if (!exists(assetsManifestFile) or !exists(sceneManifestFile) or
             !exists(scriptManifestFile)) {
             Panic("One or more manifest files not found");
         }
 
-        project->Assets  = std::make_unique<AssetManifest>(assetsManifestFile);
-        project->Scenes  = std::make_unique<SceneManifest>(sceneManifestFile);
-        project->Scripts = std::make_unique<ScriptManifest>(scriptManifestFile);
+        mAssets  = std::make_unique<AssetManifest>(assetsManifestFile, mRootDir);
+        mScenes  = std::make_unique<SceneManifest>(sceneManifestFile, mRootDir);
+        mScripts = std::make_unique<ScriptManifest>(scriptManifestFile, mRootDir);
 
         // TODO: Yes these error message suck, I'll fix it later (probably not but who knows)
-        if (!project->Assets || !project->Scenes || !project->Scripts) {
-            Panic("One or more assets or scenes not found");
-        }
+        if (!mAssets || !mScenes || !mScripts) { Panic("One or more assets or scenes not found"); }
+    }
 
-        return std::move(project);
+    [[nodiscard]] str ToString() const {
+        std::ostringstream os;
+        os << mName << '\n';
+        os << mVersion << '\n';
+        os << mAuthor << '\n';
+        os << mContentDir.string() << '\n';
+        os << mBuildDir.string() << '\n';
+        return os.str();
     }
 
     void Build() const {
-        Assets->Build();
-        Scenes->Build();
-        Scripts->Build();
+        mAssets->Build();
+        mScenes->Build();
+        mScripts->Build();
     }
 
     void Rebuild() const {
-        Assets->Rebuild();
-        Scenes->Rebuild();
-        Scripts->Rebuild();
+        mAssets->Rebuild();
+        mScenes->Rebuild();
+        mScripts->Rebuild();
     }
 
     void Clean() const {
-        Assets->Clean();
-        Scenes->Clean();
-        Scripts->Clean();
+        mAssets->Clean();
+        mScenes->Clean();
+        mScripts->Clean();
     }
+
+private:
+    str mName;
+    str mVersion;
+    str mAuthor;
+    Path mRootDir;
+    Path mContentDir;
+    Path mBuildDir;
+    Unique<AssetManifest> mAssets;
+    Unique<SceneManifest> mScenes;
+    Unique<ScriptManifest> mScripts;
 };

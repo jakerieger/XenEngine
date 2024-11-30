@@ -43,17 +43,17 @@ int main(int argc, char* argv[]) {
 
     CLI11_PARSE(app, argc, argv);
 
-    const auto project = Project::Load(projectFilename);
+    const Project project(projectFilename);
 
     if (build) {
         std::cout << "Building project..." << std::endl;
-        project->Build();
+        project.Build();
     } else if (rebuild) {
         std::cout << "Rebuilding project..." << std::endl;
-        project->Rebuild();
+        project.Rebuild();
     } else if (clean) {
         std::cout << "Cleaning project..." << std::endl;
-        project->Clean();
+        project.Clean();
     }
 
     return 0;

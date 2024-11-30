@@ -8,7 +8,9 @@
 
 class ScriptManifest {
 public:
-    explicit ScriptManifest(const Path& filename);
+    Path RootDir;
+
+    explicit ScriptManifest(const Path& filename, const Path& root) : RootDir(root) {}
 
     void Build() {}
     void Rebuild() {}

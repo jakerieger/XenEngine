@@ -16,128 +16,47 @@
 #include <ranges>
 #include <thread>
 #include <filesystem>
-
-namespace fs = std::filesystem;
+#include <utility>
 
 class AssetManifest {
 public:
-    fs::path RootDir;
-    fs::path OutputDir;
-    bool Compress;
+    Path RootDir;
     std::vector<Asset> Assets;
 
-    explicit AssetManifest(const Path& filename) : Compress(false) {
-        // Assets.clear();
-        // pugi::xml_document doc;
-        // const pugi::xml_parse_result result = doc.load_file(filename.c_str());
-        // if (!result) { Panic("Failed to load manifest file"); }
-        // RootDir                     = fs::canonical(filename).parent_path();
-        // const auto& rootNode        = doc.child("PakManifest");
-        // OutputDir                   = fs::path(rootNode.child_value("OutputDir"));
-        // Compress                    = rootNode.child("Compress").text().as_bool();
-        // const auto& contentNode     = rootNode.child("Content");
-        // const auto& contentChildren = contentNode.children("Asset");
-        // const i64 assetCount        = std::distance(contentChildren.begin(),
-        // contentChildren.end()); Assets.reserve(assetCount); for (const auto& asset :
-        // contentChildren) {
-        //     const auto& assetName   = asset.attribute("name").as_string();
-        //     const auto& assetType   = asset.child_value("Type");
-        //     const auto& assetSource = asset.child_value("Source");
-        //     Assets.emplace_back(assetName, assetType, assetSource);
-        // }
-
-        // Load build cache if it exists
-        const auto cacheFile = RootDir / ".build_cache";
-        if (exists(cacheFile)) {
-            mCache = std::make_unique<BuildCache>(cacheFile.string().c_str());
-        } else {
-            mCache = std::make_unique<BuildCache>();
+    explicit AssetManifest(const Path& filename, const Path& root) : RootDir(root) {
+        Assets.clear();
+        pugi::xml_document doc;
+        const pugi::xml_parse_result result = doc.load_file(filename.c_str());
+        if (!result) { Panic("Failed to load manifest file"); }
+        const auto& rootNode = doc.child("Assets");
+        if (rootNode.empty()) { Panic("Failed to load manifest file"); }
+        for (const auto& node : rootNode.children("Asset")) {
+            const auto name   = node.attribute("name").as_string();
+            const auto type   = node.child_value("Type");
+            const auto source = node.child_value("Source");
+            Assets.emplace_back(name, type, source);
         }
     }
 
     ~AssetManifest() {
-        mCache.reset();
+        Assets.clear();
     }
 
-    void Build() const {
-        std::vector<std::pair<const Asset*, fs::path>> assetsToBuild;
-        for (const auto& asset : Assets) {
-            fs::path sourceFile = RootDir / asset.Source;
-            bool rebuild        = false;
-            if (auto checksum = mCache->GetChecksum(asset.Source)) {
-                auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
-                if (currentHash != checksum) {
-                    mCache->Update(asset.Source, currentHash);
-                    rebuild = true;
-                }
-            } else {
-                auto currentHash = BuildCache::CalculateChecksum(canonical(sourceFile).string());
-                mCache->Update(asset.Source, currentHash);
-                rebuild = true;
-            }
-
-            if (rebuild) {
-                assetsToBuild.emplace_back(&asset, sourceFile);
-            } else {
-                std::cout << "  | Skipping unchanged asset: " << asset.Name << '\n';
-            }
-        }
-
-        std::vector<std::future<void>> futures;
-        for (const auto& asset : assetsToBuild | std::views::keys) {
-            futures.emplace_back(std::async(std::launch::async, [&]() {
-                static std::atomic<i32> assetId = 1;
-                const int localId               = assetId.fetch_add(1);
-                std::cout << "  | [" << localId << "/" << assetsToBuild.size()
-                          << "] Building asset: " << asset->Name << '\n';
-                BuildAsset(mContentDir, *asset, std::filesystem::path(asset->Source), Compress);
-            }));
-        }
-
-        // Wait for all the tasks to complete
-        for (auto& future : futures) {
-            if (future.valid()) future.get();
-        }
-
-        mCache->SaveToFile(RootDir.string());
-    }
+    void Build() const {}
 
     void Rebuild() {
         Clean();
         Build();
     }
 
-    void Clean() {
-        mContentDir          = CreateOutputDir();
-        const auto cacheFile = RootDir / ".build_cache";
-        if (exists(cacheFile)) { remove(cacheFile); }
-        mCache->Assets.clear();
-    }
+    void Clean() {}
 
 private:
-    fs::path mManifestPath;
-    Unique<BuildCache> mCache;
-    fs::path mContentDir;
-
-    void CleanContentDirectory() const {
-        if (fs::exists(OutputDir)) { fs::remove_all(OutputDir); }
-    }
-
-    [[nodiscard]] fs::path CreateOutputDir() const {
-        const auto contentDir = RootDir / OutputDir;
-        CleanContentDirectory();
-        fs::create_directories(contentDir);
-        return contentDir;
-    }
-
-    static void BuildAsset(const fs::path& outputDir,
-                           const Asset& asset,
-                           const fs::path& sourceFile,
-                           const bool compress = false) {
+    static void BuildAsset(const Path& outputDir, const Asset& asset, const Path& sourceFile) {
         auto outputFile = outputDir / sourceFile;
         outputFile.replace_extension(".xpkf");
-        if (fs::exists(outputFile)) { fs::remove(outputFile); }
-        fs::create_directories(outputFile.parent_path());
+        if (exists(outputFile)) { remove(outputFile); }
+        create_directories(outputFile.parent_path());
 
         std::vector<u8> data;
         std::unordered_map<str, str> metadata;
@@ -156,14 +75,12 @@ private:
         if (data.empty()) { return; }
 
         const auto originalSize = data.size();
-        if (compress) {
-            std::cout << "  |  -  Compressing...\n";
-            const auto result = LZMA::Compress(data);
-            if (result.has_value()) {
-                const auto& compressedData = result.value();
-                data.assign(compressedData.begin(), compressedData.end());
-                data.shrink_to_fit();  // probably not necessary
-            }
+        std::cout << "  |  -  Compressing...\n";
+        const auto result = LZMA::Compress(data);
+        if (result.has_value()) {
+            const auto& compressedData = result.value();
+            data.assign(compressedData.begin(), compressedData.end());
+            data.shrink_to_fit();  // probably not necessary
         }
 
         if (!PakFile::Write(data, outputFile, compress, originalSize)) {
@@ -171,7 +88,7 @@ private:
         }
 
         const auto metadataFile = outputFile.replace_extension(".xmdf");
-        if (fs::exists(metadataFile)) { fs::remove(metadataFile); }
+        if (exists(metadataFile)) { remove(metadataFile); }
         if (!MetadataFile::Write(metadataFile, metadata)) {
             std::cout << "  |  [ERROR] Writing to metadata file failed.\n";
         }

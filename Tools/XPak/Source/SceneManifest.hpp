@@ -8,7 +8,9 @@
 
 class SceneManifest {
 public:
-    explicit SceneManifest(const Path& filename);
+    Path RootDir;
+
+    explicit SceneManifest(const Path& filename, const Path& root) : RootDir(root) {}
 
     void Build() {}
     void Rebuild() {}
