@@ -56,7 +56,7 @@ public:
 
     [[nodiscard]] static str CalculateChecksum(const str& filename) {
         std::ifstream file(filename, std::ios::binary);
-        if (!file) { Panic("Failed to open file"); }
+        if (!file) { Panic("Failed to open file: %s", filename.c_str()); }
 
         SHA256 sha256;
         std::vector<char> buffer(4096);

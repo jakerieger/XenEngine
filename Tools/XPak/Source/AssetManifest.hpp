@@ -43,13 +43,10 @@ public:
     }
 
     void Build() const {
-        using std::pair;
-        using std::vector;
-
         const auto assetDir = mBuildDir / "assets";
         if (!exists(assetDir)) { create_directories(assetDir); }
 
-        vector<const Asset*> assetsToBuild;
+        std::vector<const Asset*> assetsToBuild;
         const auto cache = mBuildCache.lock();
         for (const auto& asset : mAssets) {
             auto sourceFile = mSourceDir / asset.Source;
