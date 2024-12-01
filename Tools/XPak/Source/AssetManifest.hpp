@@ -79,11 +79,6 @@ public:
         }
     }
 
-    void Rebuild() const {
-        Clean();
-        Build();
-    }
-
     void Clean() const {
         const auto assetDir = mBuildDir / "assets";
         if (exists(assetDir)) { remove_all(assetDir); }

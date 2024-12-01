@@ -55,7 +55,7 @@ public:
             if (rebuild) {
                 scenesToBuild.emplace_back(name, text);
             } else {
-                std::cout << "  | Skipping asset: " << name << "\n";
+                std::cout << "  | Skipping scene: " << name << "\n";
             }
         }
 
@@ -72,11 +72,6 @@ public:
             outFile.write(RCAST<char*>(compressed.data()), (std::streamsize)compressed.size());
             outFile.close();
         }
-    }
-
-    void Rebuild() {
-        Clean();
-        Build();
     }
 
     void Clean() const {
