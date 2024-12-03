@@ -52,8 +52,8 @@ public:
         }
 
         mAssets  = std::make_unique<AssetManifest>(assetsManifestFile, mBuildDir, mBuildCache);
-        mScenes  = std::make_unique<SceneManifest>(sceneManifestFile, mBuildDir, mBuildCache);
-        mScripts = std::make_unique<ScriptManifest>(scriptManifestFile, mBuildDir, mBuildCache);
+        mScenes  = std::make_unique<SceneManifest>(sceneManifestFile, mBuildDir);
+        mScripts = std::make_unique<ScriptManifest>(scriptManifestFile, mBuildDir);
 
         // TODO: Yes these error message suck, I'll fix it later (probably not but who knows)
         if (!mAssets || !mScenes || !mScripts) { Panic("One or more assets or scenes not found"); }

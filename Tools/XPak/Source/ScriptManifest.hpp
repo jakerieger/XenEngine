@@ -5,16 +5,18 @@
 #pragma once
 
 #include <Types.hpp>
+#include <IO.hpp>
+#include <Expect.hpp>
+
+#include "TableEntry.hpp"
 
 class ScriptManifest {
 public:
-    explicit
-    ScriptManifest(const Path& filename, const Path& buildDir, const Weak<BuildCache>& buildCache)
-        : mBuildDir(buildDir), mBuildCache(buildCache) {
+    explicit ScriptManifest(const Path& filename, const Path& buildDir) : mBuildDir(buildDir) {
         mSourceDir = filename.parent_path() / "Scripts";
         pugi::xml_document doc;
         const auto result = doc.load_file(filename.string().c_str());
-        if (!result) { Panic("Failed to load scene manifest"); }
+        if (!result) { Panic("Failed to load script manifest"); }
         const auto root = doc.child("Scripts");
         for (const auto& node : root.children("Script")) {
             const auto script     = node.text().as_string();
@@ -28,56 +30,61 @@ public:
     }
 
     void Build() {
-        const auto cache     = mBuildCache.lock();
-        const auto scriptDir = mBuildDir / "scripts";
-        if (!exists(scriptDir)) { create_directories(scriptDir); }
+        const auto scriptCount = mScripts.size();
 
-        std::vector<std::pair<const str&, const str&>> scriptsToBuild;
-        for (const auto& [name, text] : mScripts) {
-            auto sourceFile = mSourceDir / name;
-            bool rebuild    = false;
-            if (auto checksum = cache->GetChecksum(name)) {
-                auto currentHash = BuildCache::CalculateChecksum(sourceFile.string());
-                if (currentHash != checksum) {
-                    cache->Update(name, currentHash);
-                    rebuild = true;
-                }
-            } else {
-                auto currentHash = BuildCache::CalculateChecksum(sourceFile.string());
-                cache->Update(name, currentHash);
-                rebuild = true;
-            }
+        size_t scriptDataSize = 0;
+        scriptDataSize += sizeof(size_t);                    // For script count value
+        scriptDataSize += sizeof(TableEntry) * scriptCount;  // For script table
+        const size_t headerSize = scriptDataSize;
+        // For script data
+        scriptDataSize += std::accumulate(
+          mScripts.begin(),
+          mScripts.end(),
+          0.0,
+          [](size_t sum, const std::pair<str, str>& entry) { return sum + entry.second.size(); });
 
-            if (rebuild) {
-                scriptsToBuild.emplace_back(name, text);
-            } else {
-                std::cout << "  | Skipping script: " << name << "\n";
-            }
+        // Allocate our array once we know the total size
+        std::vector<u8> scriptData(scriptDataSize);
+        std::vector<TableEntry> scriptEntries;
+        size_t offset = headerSize;
+        for (const auto& [name, source] : mScripts) {
+            scriptEntries.emplace_back(name.c_str(), source.size(), offset);
+            offset += source.size();
         }
 
-        int scriptId = 1;
-        for (const auto& [name, text] : scriptsToBuild) {
-            std::cout << "  | [" << scriptId++ << "/" << scriptsToBuild.size()
-                      << "] Building script: " << name << '\n';
-            std::vector<u8> data(text.begin(), text.end());
-            const auto result = GZip::Compress(data);
-            auto compressed   = Expect(result, "Failed to compress script data");
-            auto filename     = scriptDir / name;
-            filename.replace_extension(".xbvf");
-            std::ofstream outFile(filename, std::ios::binary);
-            outFile.write(RCAST<char*>(compressed.data()), (std::streamsize)compressed.size());
-            outFile.close();
+        // Start copying data to our script bytes
+        memcpy(scriptData.data(), &scriptCount, sizeof(size_t));
+        offset = sizeof(size_t);
+        for (const auto& entry : scriptEntries) {
+            memcpy(scriptData.data() + offset, &entry.Name, strlen(entry.Name));
+            offset += 64;
+            memcpy(scriptData.data() + offset, &entry.Offset, 4);
+            offset += 4;
+            memcpy(scriptData.data() + offset, &entry.Size, 4);
+            offset += 4;
         }
+
+        // Copy actual script data
+        for (const auto& source : mScripts | std::views::values) {
+            memcpy(scriptData.data() + offset, source.c_str(), source.size());
+            offset += source.size();
+        }
+
+        // Compress our script data
+        const auto result        = GZip::Compress(scriptData);
+        const auto compresedData = Expect(result, "Failed to compress script data");
+
+        const auto filename = mBuildDir / "script_data.xpkf";
+        if (!IO::WriteBytes(filename, compresedData)) { Panic("Failed to write script data"); }
     }
 
     void Clean() const {
-        const auto scriptsDir = mBuildDir / "scripts";
-        if (exists(scriptsDir)) { remove_all(scriptsDir); }
+        const auto filename = mBuildDir / "script_data.xpkf";
+        if (exists(filename)) { remove(filename); }
     }
 
 private:
     Path mBuildDir;
-    Weak<BuildCache> mBuildCache;
     std::unordered_map<str, str> mScripts;
     Path mSourceDir;
 };

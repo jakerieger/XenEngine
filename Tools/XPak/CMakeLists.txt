@@ -20,6 +20,7 @@ add_executable(XPak
         Source/SceneManifest.hpp
         Source/ScriptManifest.hpp
         Source/Project.hpp
+        Source/TableEntry.hpp
 )
 
 find_package(CLI11 CONFIG REQUIRED)

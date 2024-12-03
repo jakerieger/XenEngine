@@ -4,42 +4,18 @@
 
 #pragma once
 
-#include "Expect.hpp"
-#include "IO.hpp"
+#include "TableEntry.hpp"
 
+#include <IO.hpp>
+#include <Expect.hpp>
 #include <Panic.hpp>
 #include <Types.hpp>
 #include <Compression.hpp>
 #include <numeric>
-#include <pugixml.hpp>
-
-struct SceneEntry {
-    char Name[64];
-    u32 Size;
-    u32 Offset;
-
-    SceneEntry() {
-        memset(Name, 0, 64);
-        Size   = 0;
-        Offset = 0;
-    }
-
-    SceneEntry(const char* name, u32 size, u32 offset) {
-        const auto nameLen = strlen(name);
-        if (nameLen > 63) { Panic("SceneEntry name is too long"); }
-        strcpy(Name, name);
-        Name[nameLen] = '\0';
-        Size          = size;
-        Offset        = offset;
-    }
-};
 
 class SceneManifest {
 public:
-    explicit SceneManifest(const Path& filename,
-                           const Path& buildDir,
-                           const Weak<BuildCache>& buildCache)
-        : mBuildDir(buildDir), mBuildCache(buildCache) {
+    explicit SceneManifest(const Path& filename, const Path& buildDir) : mBuildDir(buildDir) {
         mSourceDir = filename.parent_path() / "Scenes";
         pugi::xml_document doc;
         const auto result = doc.load_file(filename.string().c_str());
@@ -59,7 +35,7 @@ public:
 
         size_t sceneDataSize = 0;
         sceneDataSize += sizeof(size_t);                   // For scene count value
-        sceneDataSize += sizeof(SceneEntry) * sceneCount;  // For scene table
+        sceneDataSize += sizeof(TableEntry) * sceneCount;  // For scene table
         const size_t headerSize = sceneDataSize;
         // For scene data
         sceneDataSize += std::accumulate(
@@ -70,7 +46,7 @@ public:
 
         // Allocate our array once we know the total size
         std::vector<u8> sceneData(sceneDataSize);
-        std::vector<SceneEntry> sceneEntries;
+        std::vector<TableEntry> sceneEntries;
         size_t offset = headerSize;
         for (const auto& [name, source] : mScenes) {
             sceneEntries.emplace_back(name.c_str(), source.size(), offset);
@@ -104,13 +80,12 @@ public:
     }
 
     void Clean() const {
-        const auto scenesDir = mBuildDir / "scenes";
-        if (exists(scenesDir)) { remove_all(scenesDir); }
+        const auto filename = mBuildDir / "scene_data.xpkf";
+        if (exists(filename)) { remove(filename); }
     }
 
 private:
     Path mBuildDir;
-    Weak<BuildCache> mBuildCache;
     std::unordered_map<str, str> mScenes;
     Path mSourceDir;
 };
