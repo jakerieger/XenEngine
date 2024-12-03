@@ -15,16 +15,8 @@ print("Copying example content.")
 
 
 def example_pong():
-    source = "Examples/Pong/Content/Build"
+    source = "Examples/Pong/Build"
     target = "build/Debug/bin/Examples/Pong/Content"
-    replace_directory(target, source)
-
-    source = "Examples/Pong/Scripts"
-    target = "build/Debug/bin/Examples/Pong/Scripts"
-    replace_directory(target, source)
-
-    source = "Examples/Pong/Scenes"
-    target = "build/Debug/bin/Examples/Pong/Scenes"
     replace_directory(target, source)
 
 
