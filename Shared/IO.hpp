@@ -11,6 +11,7 @@
 
 class IO {
 public:
+#pragma region Read
     static std::optional<std::vector<uint8_t>> ReadBytes(const std::filesystem::path& filename) {
         if (!exists(filename)) { return {}; }
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
@@ -31,4 +32,24 @@ public:
         buffer << file.rdbuf();
         return buffer.str();
     }
+#pragma endregion
+
+#pragma region Write
+    static bool WriteBytes(const std::filesystem::path& filename,
+                           const std::vector<uint8_t>& bytes) {
+        std::ofstream file(filename, std::ios::binary);
+        if (!file.is_open()) { return false; }
+        file.write(RCAST<const char*>(bytes.data()), bytes.size());
+        file.close();
+        return true;
+    }
+
+    static bool WriteString(const std::filesystem::path& filename, const std::string& str) {
+        std::ofstream file(filename);
+        if (!file.is_open()) { return false; }
+        file << str;
+        file.close();
+        return true;
+    }
+#pragma endregion
 };
